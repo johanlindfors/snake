@@ -70,7 +70,6 @@ class Snake < Drawable
     end
 
     def draw
-        super
         @trail.each do |element| 
             Gosu.draw_rect(element.x * SPRITE_SIZE + 1, element.y * SPRITE_SIZE + 1, SPRITE_SIZE - 1, SPRITE_SIZE - 1, @color)
         end
