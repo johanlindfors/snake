@@ -9,43 +9,53 @@
             kontra.init();
             
             // variables
-            playerX=playerY=10;
-            spriteSize=20
-            screenSize=20;
-            appleX=appleY=3;
-            velocityX=velocityY=0;
+            SPRITE_SIZE = 20
+            SCREEN_SIZE = 20;
             
             let apple = kontra.sprite({
                 x: 3,
                 y: 3,
 
                 // required for a rectangle sprite
-                width: spriteSize,
-                height: spriteSize,
+                width: SPRITE_SIZE,
+                height: SPRITE_SIZE,
                 color: 'red',
                 
                 render: function() {
                     this.context.fillStyle = this.color;
-                    this.context.fillRect(this.x * screenSize + 1, this.y * screenSize + 1, this.width - 1, this.height - 1);
+                    this.context.fillRect(this.x * SPRITE_SIZE + 1, this.y * SPRITE_SIZE + 1, this.width - 1, this.height - 1);
                 }
             });
 
             let snake = kontra.sprite({
                 x: 10,
-                y: 10,                
+                y: 10,           
                 tail: 5,
                 trail: [],
   
                 // required for a rectangle sprite
-                width: spriteSize,
-                height: spriteSize,
+                width: SPRITE_SIZE,
+                height: SPRITE_SIZE,
                 color: 'green',
                 bodyColor: 'lightgreen',
 
+                checkCollision: function() {
+                    this.trail.forEach(element => {
+                        if(element.x == this.x && element.y == this.y){
+                            if(snake.tail > 5){
+                                console.log("Scored: %i", this.tail - 5);
+                            }
+                            this.x = this.y = 10;
+                            this.dx = this.dy = 0;
+                            this.tail = 5;
+                        }
+                    });
+                },
+
                 update: function() {
 
-                    this.x = this.x > screenSize -1 ? 0 : this.x < 0 ? screenSize-1 : this.x;
-                    this.y = this.y > screenSize -1 ? 0 : this.y < 0 ? screenSize-1 : this.y;                
+                    this.x = this.x > screenSize -1 ? 0 : this.x < 0 ? screenSize - 1 : this.x;
+                    this.y = this.y > screenSize -1 ? 0 : this.y < 0 ? screenSize - 1 : this.y;                
 
                     this.trail.push({ x: this.x, y: this.y});
                     this.advance();
@@ -53,65 +63,60 @@
                     while(this.trail.length > this.tail){
                         this.trail.shift();
                     }
+
+                    this.checkCollision();
                 },
                 
                 render: function() {
                     this.context.fillStyle = this.bodyColor;
                     this.trail.forEach(element => {
-                        this.context.fillRect(element.x * screenSize + 1, element.y * screenSize + 1, this.width - 1, this.height - 1);
+                        this.context.fillRect(element.x * SPRITE_SIZE + 1, element.y * SPRITE_SIZE + 1, this.width - 1, this.height - 1);
                     });                
                     this.context.fillStyle = this.color;
-                    this.context.fillRect(this.x * screenSize + 1, this.y * screenSize + 1 , this.width - 1, this.height - 1);
+                    this.context.fillRect(this.x * SPRITE_SIZE + 1, this.y * SPRITE_SIZE + 1 , this.width - 1, this.height - 1);
                 }
             });
 
             function checkInput() {
-                if(kontra.keys.pressed('left') && snake.dx == 0){
-                    snake.dx = -1;
-                    snake.dy = 0;
+                if(snake.dx == 0){
+                    if(kontra.keys.pressed('left')) {
+                        snake.dx = -1;
+                        snake.dy = 0;
+                    }
+                    if(kontra.keys.pressed('right')) {
+                        snake.dx = 1;
+                        snake.dy = 0;
+                    }
+                } else if(snake.dy == 0) {
+                    if(kontra.keys.pressed('down')) {
+                        snake.dx = 0;
+                        snake.dy = 1;
+                    }
+                    if(kontra.keys.pressed('up')) {
+                        snake.dx = 0;
+                        snake.dy = -1;
+                    }
                 }
-                if(kontra.keys.pressed('right') && snake.dx == 0){
-                    snake.dx = 1;
-                    snake.dy = 0;
-                }
-                if(kontra.keys.pressed('down') && snake.dy == 0){
-                    snake.dx = 0;
-                    snake.dy = 1;
-                }
-                if(kontra.keys.pressed('up') && snake.dy == 0){
-                    snake.dx = 0;
-                    snake.dy = -1;
-                }
+            }
+
+            function generateApple() {
+                needNewApple = false;
+                do {
+                    needNewApple = false;
+                    apple.x = Math.floor(Math.random() * screenSize);
+                    apple.y = Math.floor(Math.random() * screenSize);
+                    snake.trail.forEach(element => {
+                        needNewApple |= (element.x == apple.x && element.y == apple.y);
+                    });
+                } while(needNewApple)
             }
 
             function checkPickup() {
                 if(apple.x == snake.x && apple.y == snake.y){
                     snake.tail++;
-                    needNewApple = false;
-                    do {
-                        needNewApple = false;
-                        apple.x = Math.floor(Math.random() * screenSize);
-                        apple.y = Math.floor(Math.random() * screenSize);
-                        snake.trail.forEach(element => {
-                            needNewApple |= (element.x == apple.x && element.y == apple.y);
-                        });
-                    } while(needNewApple)
+                    generateApple();
                 }
             }
-
-            function checkCollision() {
-                snake.trail.forEach(element => {
-                    if(element.x == snake.x && element.y == snake.y){
-                        if(snake.tail > 5){
-                            console.log("Scored: %i", snake.tail - 5);
-                        }
-                        snake.x = snake.y = 10;
-                        snake.dx = snake.dy = 0;
-                        snake.tail = 5;
-                    }
-                });
-            }
-
             
             let loop = kontra.gameLoop({
                 fps: 15,
@@ -119,10 +124,8 @@
             
                 update: function() {
                     checkInput();
-                    snake.update();
-                    apple.update();
-                    checkCollision();
                     checkPickup();
+                    snake.update();
                 },
             
                 render: function() {
