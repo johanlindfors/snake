@@ -2,6 +2,8 @@ require 'gosu'
 
 SCREEN_SIZE = 20
 SPRITE_SIZE = 20
+INITIAL_TAIL = 5
+FPS = 15
 
 class Drawable
     attr_accessor :x, :y
@@ -31,13 +33,13 @@ class Snake < Drawable
         @dx = @dy = 0
         @color = 0xff00ff00
         @trail = Array.new
-        @tail = 5
+        @tail = INITIAL_TAIL
     end
 
     def checkCollision
         @trail.each do |element| 
-            if x == element.x and y == element.y and tail > 5
-                @tail = 5
+            if x == element.x and y == element.y and tail > INITIAL_TAIL
+                @tail = INITIAL_TAIL
                 @x = @y = 10
                 @dx = @dy = 0
             end
@@ -77,17 +79,17 @@ class Snake < Drawable
 end
 
 class SnakeWindow < Gosu::Window
-    def initialize()
-        super 400, 400
+    def initialize
+        super SPRITE_SIZE * SCREEN_SIZE, SPRITE_SIZE * SCREEN_SIZE
         self.caption = 'Snake'
-        self.update_interval = 1000/15
+        self.update_interval = 1000/FPS
 
         @apple = Apple.new
         @snake = Snake.new
         @prng = Random.new
     end
 
-    def resetApple()
+    def resetApple
         needNewApple = true
         while needNewApple do
             needNewApple = false
@@ -99,14 +101,14 @@ class SnakeWindow < Gosu::Window
         end
     end
 
-    def checkPickup()
+    def checkPickup
         if @snake.x == @apple.x and @snake.y == @apple.y
             @snake.tail += 1
             resetApple()
         end
     end
 
-    def handleInput()
+    def handleInput
         if @snake.dx == 0
             if Gosu.button_down? Gosu::KB_LEFT
                 @snake.dx = -1
@@ -129,15 +131,15 @@ class SnakeWindow < Gosu::Window
         end
     end
 
-    def update()
-        handleInput()
-        checkPickup()
-        @snake.update()
+    def update
+        handleInput
+        checkPickup
+        @snake.update
     end
 
-    def draw()
-        @apple.draw()
-        @snake.draw()
+    def draw
+        @apple.draw
+        @snake.draw
     end
 end
 

@@ -3,6 +3,8 @@ kontra.init();
 // variables
 SPRITE_SIZE = 20
 SCREEN_SIZE = 20;
+INITIAL_TAIL = 5;
+FPS = 15
 
 let apple = kontra.sprite({
     x: 3,
@@ -22,36 +24,34 @@ let apple = kontra.sprite({
 let snake = kontra.sprite({
     x: 10,
     y: 10,           
-    tail: 5,
+    tail: INITIAL_TAIL,
     trail: [],
 
     // required for a rectangle sprite
     width: SPRITE_SIZE,
     height: SPRITE_SIZE,
     color: 'green',
-    bodyColor: 'lightgreen',
-
+    
     checkCollision: function() {
         this.trail.forEach(element => {
-            if(element.x == this.x && element.y == this.y){
-                if(snake.tail > 5){
-                    console.log("Scored: %i", this.tail - 5);
+            if(element.x == this.x && element.y == this.y) {
+                if(snake.tail > INITIAL_TAIL){
+                    console.log("Scored: %i", this.tail - INITIAL_TAIL);
                 }
                 this.x = this.y = 10;
                 this.dx = this.dy = 0;
-                this.tail = 5;
+                this.tail = INITIAL_TAIL;
             }
         });
     },
 
     update: function() {
-
         this.x = this.x > SCREEN_SIZE -1 ? 0 : this.x < 0 ? SCREEN_SIZE - 1 : this.x;
         this.y = this.y > SCREEN_SIZE -1 ? 0 : this.y < 0 ? SCREEN_SIZE - 1 : this.y;                
 
         this.trail.push({ x: this.x, y: this.y});
         this.advance();
-
+        
         while(this.trail.length > this.tail){
             this.trail.shift();
         }
@@ -60,12 +60,10 @@ let snake = kontra.sprite({
     },
     
     render: function() {
-        this.context.fillStyle = this.bodyColor;
+        this.context.fillStyle = this.color;
         this.trail.forEach(element => {
             this.context.fillRect(element.x * SPRITE_SIZE + 1, element.y * SPRITE_SIZE + 1, this.width - 1, this.height - 1);
-        });                
-        this.context.fillStyle = this.color;
-        this.context.fillRect(this.x * SPRITE_SIZE + 1, this.y * SPRITE_SIZE + 1 , this.width - 1, this.height - 1);
+        });
     }
 });
 
@@ -112,7 +110,7 @@ function checkPickup() {
 }
 
 let loop = kontra.gameLoop({
-    fps: 15,
+    fps: FPS,
     clearCanvas: true,
 
     update: function() {

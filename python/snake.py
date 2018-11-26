@@ -9,6 +9,7 @@ GREEN = 0, 255, 0
 MIDDLE = math.floor(SCREEN_SIZE/2)
 THIRD = math.floor(SCREEN_SIZE/3)
 INITIAL_TAIL = 5
+FPS = 15
 
 width = SCREEN_SIZE * SPRITE_SIZE
 height = SCREEN_SIZE * SPRITE_SIZE
@@ -101,7 +102,7 @@ class SnakeGame(object):
 
     def run(self):
         while True:
-            clock.tick(15)
+            clock.tick(FPS)
             self.handle_input()
             self.update()
             self.draw()
