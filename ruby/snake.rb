@@ -24,7 +24,7 @@ class Apple < Drawable
 end
 
 class Snake < Drawable
-    attr_accessor :dx, :dy, :tail
+    attr_accessor :dx, :dy, :tail, :trail
 
     def initialize
         @x = @y = 10
@@ -88,15 +88,26 @@ class SnakeWindow < Gosu::Window
         @prng = Random.new
     end
 
-    def checkPickup
-        if @snake.x == @apple.x and @snake.y == @apple.y
-            @snake.tail += 1
+    def resetApple()
+        needNewApple = true
+        while needNewApple do
+            needNewApple = false
             @apple.x = @prng.rand(20)
             @apple.y = @prng.rand(20)
+            @snake.trail.each do |element|
+                needNewApple |= (element.x == @apple.x && element.y == @apple.y)
+            end
         end
     end
 
-    def handleInput
+    def checkPickup()
+        if @snake.x == @apple.x and @snake.y == @apple.y
+            @snake.tail += 1
+            resetApple()
+        end
+    end
+
+    def handleInput()
         if @snake.dx == 0
             if Gosu.button_down? Gosu::KB_LEFT
                 @snake.dx = -1
@@ -119,15 +130,15 @@ class SnakeWindow < Gosu::Window
         end
     end
 
-    def update
-        handleInput
-        checkPickup
-        @snake.update
+    def update()
+        handleInput()
+        checkPickup()
+        @snake.update()
     end
 
-    def draw
-        @apple.draw
-        @snake.draw
+    def draw()
+        @apple.draw()
+        @snake.draw()
     end
 end
 
