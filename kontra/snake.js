@@ -46,11 +46,11 @@ let snake = kontra.sprite({
     },
 
     update: function() {
+        this.advance();
         this.x = this.x > SCREEN_SIZE -1 ? 0 : this.x < 0 ? SCREEN_SIZE - 1 : this.x;
         this.y = this.y > SCREEN_SIZE -1 ? 0 : this.y < 0 ? SCREEN_SIZE - 1 : this.y;                
 
         this.trail.push({ x: this.x, y: this.y});
-        this.advance();
         
         while(this.trail.length > this.tail){
             this.trail.shift();
@@ -120,6 +120,8 @@ let loop = kontra.gameLoop({
     },
 
     render: function() {
+        kontra.context.fillStyle = 'black';
+        kontra.context.fillRect(0, 0, kontra.canvas.width, kontra.canvas.height);
         snake.render();
         apple.render();
     }
