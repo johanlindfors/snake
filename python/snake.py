@@ -57,11 +57,14 @@ class SnakeGame(object):
                 self._player = pygame.Vector2(MIDDLE, MIDDLE)
                 self._speed = pygame.Vector2(0,0)
 
+    def generate_apple(self):
+        self._apple.x = random.randint(0, SCREEN_SIZE - 1)
+        self._apple.y = random.randint(0, SCREEN_SIZE - 1)
+
     def check_pickup(self):
         if self._apple == self._player:
             self._tail += 1
-            self._apple.x = random.randint(0, SCREEN_SIZE - 1)
-            self._apple.y = random.randint(0, SCREEN_SIZE - 1)
+            self.generate_apple()
 
     def update(self):
         self._player.x += self._speed.x
