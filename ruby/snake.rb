@@ -1,6 +1,7 @@
 require 'gosu'
 
 SCREEN_SIZE = 20
+SPRITE_SIZE = 20
 
 class Drawable
     attr_accessor :x, :y
@@ -11,7 +12,7 @@ class Drawable
     end
 
     def draw
-        Gosu.draw_rect(x * SCREEN_SIZE + 1, y * SCREEN_SIZE + 1, SCREEN_SIZE - 1, SCREEN_SIZE - 1, @color)
+        Gosu.draw_rect(x * SPRITE_SIZE + 1, y * SPRITE_SIZE + 1, SPRITE_SIZE - 1, SPRITE_SIZE - 1, @color)
     end
 end
 
@@ -31,7 +32,6 @@ class Snake < Drawable
         @color = 0xff00ff00
         @trail = Array.new
         @tail = 5
-        @log = Logger.new(STDOUT)
     end
 
     def checkCollision
@@ -72,7 +72,7 @@ class Snake < Drawable
     def draw
         super
         @trail.each do |element| 
-            Gosu.draw_rect(element.x * SCREEN_SIZE + 1, element.y * SCREEN_SIZE + 1, SCREEN_SIZE - 1, SCREEN_SIZE - 1, @color)
+            Gosu.draw_rect(element.x * SPRITE_SIZE + 1, element.y * SPRITE_SIZE + 1, SPRITE_SIZE - 1, SPRITE_SIZE - 1, @color)
         end
     end
 end
