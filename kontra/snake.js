@@ -1,23 +1,22 @@
-kontra.init();
-            
 // variables
 SPRITE_SIZE = 20
 SCREEN_SIZE = 20;
 INITIAL_TAIL = 5;
 FPS = 15
 
+kontra.init();
+
 let apple = kontra.sprite({
     x: 3,
     y: 3,
 
-    // required for a rectangle sprite
-    width: SPRITE_SIZE,
-    height: SPRITE_SIZE,
+    width: SPRITE_SIZE - 1,
+    height: SPRITE_SIZE - 1,
     color: 'red',
     
     render: function() {
         this.context.fillStyle = this.color;
-        this.context.fillRect(this.x * SPRITE_SIZE + 1, this.y * SPRITE_SIZE + 1, this.width - 1, this.height - 1);
+        this.context.fillRect(this.x * SPRITE_SIZE + 1, this.y * SPRITE_SIZE + 1, this.width, this.height);
     }
 });
 
@@ -27,9 +26,8 @@ let snake = kontra.sprite({
     tail: INITIAL_TAIL,
     trail: [],
 
-    // required for a rectangle sprite
-    width: SPRITE_SIZE,
-    height: SPRITE_SIZE,
+    width: SPRITE_SIZE - 1,
+    height: SPRITE_SIZE - 1,
     color: 'green',
     
     checkCollision: function() {
@@ -50,19 +48,18 @@ let snake = kontra.sprite({
         this.x = this.x > SCREEN_SIZE -1 ? 0 : this.x < 0 ? SCREEN_SIZE - 1 : this.x;
         this.y = this.y > SCREEN_SIZE -1 ? 0 : this.y < 0 ? SCREEN_SIZE - 1 : this.y;                
 
-        this.trail.push({ x: this.x, y: this.y});
-        
+        this.checkCollision();
+
+        this.trail.push({x: this.x, y: this.y});        
         while(this.trail.length > this.tail){
             this.trail.shift();
         }
-
-        this.checkCollision();
     },
     
     render: function() {
         this.context.fillStyle = this.color;
         this.trail.forEach(element => {
-            this.context.fillRect(element.x * SPRITE_SIZE + 1, element.y * SPRITE_SIZE + 1, this.width - 1, this.height - 1);
+            this.context.fillRect(element.x * SPRITE_SIZE + 1, element.y * SPRITE_SIZE + 1, this.width, this.height);
         });
     }
 });
@@ -115,13 +112,14 @@ let loop = kontra.gameLoop({
 
     update: function() {
         checkInput();
-        checkPickup();
         snake.update();
+        checkPickup();
     },
 
     render: function() {
         kontra.context.fillStyle = 'black';
         kontra.context.fillRect(0, 0, kontra.canvas.width, kontra.canvas.height);
+        
         snake.render();
         apple.render();
     }

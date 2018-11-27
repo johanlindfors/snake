@@ -1,105 +1,140 @@
-FPS = 15;
+// variables
 SPRITE_SIZE = 20
 SCREEN_SIZE = 20
 INITIAL_TAIL = 5
+FPS = 15;
 
-window.onload = function() {
-    surface = document.getElementById("surface");
-    ctx = surface.getContext("2d");
-    document.addEventListener("keydown",keyPush);
-    setInterval(game, 1000 / FPS);
-}
+var surface;
+var ctx;
 
-// variables
-playerX = playerY = 10;
-appleX = appleY = 3;
-velocityX = velocityY = 0;
-trail = [];
-tail = INITIAL_TAIL;
+let apple = {
+    x: 3,
+    y: 3,
 
-function update() {
-    playerX += velocityX;
-    playerY += velocityY;
-    if(playerX < 0){
-        playerX = SCREEN_SIZE - 1;
+    width: SPRITE_SIZE - 1,
+    height: SPRITE_SIZE - 1,
+    color: 'red',
+
+    draw: function() {
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x * SPRITE_SIZE + 1, this.y * SPRITE_SIZE + 1, this.width, this.height);
     }
-    if(playerY < 0){
-        playerY = SCREEN_SIZE - 1;
-    }
-    if(playerX > SCREEN_SIZE - 1){
-        playerX = 0;
-    }
-    if(playerY > SCREEN_SIZE - 1){
-        playerY = 0;
-    }
+};
 
-    checkCollision();
+let snake = {
+    x: 10,
+    y: 10,
+    dx: 0,
+    dy: 0,
+    tail: INITIAL_TAIL,
+    trail: [],
 
-    checkPickup();
+    width: SPRITE_SIZE - 1,
+    height: SPRITE_SIZE - 1,
+    color: 'green',
 
-    trail.push({x:playerX, y:playerY});
-    while(trail.length > tail){
-        trail.shift();
+    checkCollision: function() {
+        this.trail.forEach(element => {
+            if(element.x == this.x && element.y == this.y) {
+                if(snake.tail > INITIAL_TAIL){
+                    console.log("Scored: %i", this.tail - INITIAL_TAIL);
+                }
+                this.x = this.y = 10;
+                this.dx = this.dy = 0;
+                this.tail = INITIAL_TAIL;        
+            }
+        });    
+    },
+
+    update: function() {
+        this.x += this.dx;
+        this.y += this.dy;
+        this.x = this.x > SCREEN_SIZE -1 ? 0 : this.x < 0 ? SCREEN_SIZE - 1 : this.x;
+        this.y = this.y > SCREEN_SIZE -1 ? 0 : this.y < 0 ? SCREEN_SIZE - 1 : this.y;
+    
+        this.checkCollision();
+        
+        this.trail.push({x:this.x, y:this.y});
+        while(this.trail.length > this.tail){
+            this.trail.shift();
+        }
+    },
+
+    draw: function() {
+        ctx.fillStyle = this.color;
+        this.trail.forEach(element => {
+            ctx.fillRect(element.x * SPRITE_SIZE + 1, element.y * SPRITE_SIZE + 1, this.width, this.height);
+        });
     }
-}
+};
 
-function checkCollision() {
-   for(var i=0; i<trail.length; i++) {
-        if(trail[i].x == playerX && trail[i].y == playerY) {
-            tail = INITIAL_TAIL;
-            playerX = playerY = 10;
-            velocityX = velocityY = 0;            
+function keyPush(evt){
+    if(snake.dx == 0) {
+        switch(evt.keyCode){
+            case 37:
+                snake.dx = -1;
+                snake.dy = 0;
+                break;
+            case 39:
+                snake.dx = 1;
+                snake.dy = 0;
+                break;
+        }
+    }
+    if(snake.dy == 0){
+        switch(evt.keyCode){
+            case 38:
+            snake.dx = 0;
+            snake.dy = -1;
+            break;
+        case 40:
+            snake.dx = 0;
+            snake.dy = 1;
+            break;
         }
     }
 }
 
+function generateApple() {
+    needNewApple = false;
+    do {
+        needNewApple = false;
+        apple.x = Math.floor(Math.random() * SCREEN_SIZE);
+        apple.y = Math.floor(Math.random() * SCREEN_SIZE);
+        snake.trail.forEach(element => {
+            needNewApple |= (element.x == apple.x && element.y == apple.y);
+        });
+    } while(needNewApple)
+}
+
 function checkPickup() {
-    if(appleX == playerX && appleY == playerY){
-        tail++;
-        appleX = Math.floor(Math.random() * SCREEN_SIZE);
-        appleY = Math.floor(Math.random() * SCREEN_SIZE);
+    if(apple.x == snake.x && apple.y == snake.y){
+        snake.tail++;
+        generateApple();
     }
+}
+
+function update() {
+    snake.update();
+    checkPickup();
 }
 
 function draw() {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, surface.width, surface.height);
 
-    ctx.fillStyle = "lime";
-    for(var i=0; i<trail.length; i++) {
-        ctx.fillRect(trail[i].x * SPRITE_SIZE + 1, trail[i].y * SPRITE_SIZE + 1, SPRITE_SIZE - 1, SPRITE_SIZE - 1);
-    }
-
-    ctx.fillStyle = "red";
-    ctx.fillRect(appleX * SPRITE_SIZE + 1, appleY * SPRITE_SIZE + 1, SPRITE_SIZE - 1, SPRITE_SIZE - 1);
+    snake.draw();
+    apple.draw();
 }
 
-function game() {
+function gameLoop() {
     update();
     draw();
 }
 
-function keyPush(evt){
-    switch(evt.keyCode){
-        case 37:
-            if(velocityX == 0) {
-                velocityX=-1;velocityY=0;
-            }
-            break;
-        case 38:
-            if(velocityY == 0) {
-                velocityX=0;velocityY=-1;
-            }
-            break;
-        case 39:
-            if(velocityX == 0) {
-                velocityX=1;velocityY=0;
-            }
-            break;
-        case 40:
-            if(velocityY == 0) {
-                velocityX=0;velocityY=1;
-            }
-            break;
-    }
+window.onload = function() {
+    surface = document.getElementById("surface");
+    ctx = surface.getContext("2d");
+    document.addEventListener("keydown",keyPush);
+    setInterval(gameLoop, 1000 / FPS);
 }
