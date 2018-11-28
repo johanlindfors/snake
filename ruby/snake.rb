@@ -36,22 +36,25 @@ class Snake < Drawable
         @tail = INITIAL_TAIL
     end
 
-    def checkCollision
+    def checkCollision(x, y)
         @trail.each do |element| 
             if x == element.x and y == element.y and tail > INITIAL_TAIL
-                @tail = INITIAL_TAIL
-                @x = @y = 10
-                @dx = @dy = 0
+                return true
             end
         end
+        return false
     end
 
     def update
         @x += dx
         @y += dy
 
-        checkCollision
-
+        if checkCollision @x, @y
+            @tail = INITIAL_TAIL
+            @x = @y = 10
+            @dx = @dy = 0
+        end
+        
         if @x < 0
             @x = SCREEN_SIZE - 1
         end
@@ -90,21 +93,17 @@ class SnakeWindow < Gosu::Window
     end
 
     def resetApple
-        needNewApple = true
-        while needNewApple do
-            needNewApple = false
-            @apple.x = @prng.rand(20)
-            @apple.y = @prng.rand(20)
-            @snake.trail.each do |element|
-                needNewApple |= (element.x == @apple.x && element.y == @apple.y)
-            end
+        loop do 
+            @apple.x = @prng.rand SCREEN_SIZE
+            @apple.y = @prng.rand SCREEN_SIZE
+            break @snake.checkCollision @apple.x, @apple.y
         end
     end
 
     def checkPickup
         if @snake.x == @apple.x and @snake.y == @apple.y
             @snake.tail += 1
-            resetApple()
+            resetApple
         end
     end
 
