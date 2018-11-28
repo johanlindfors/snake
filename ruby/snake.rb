@@ -45,16 +45,7 @@ class Snake < Drawable
         return false
     end
 
-    def update
-        @x += dx
-        @y += dy
-
-        if checkCollision @x, @y
-            @tail = INITIAL_TAIL
-            @x = @y = 10
-            @dx = @dy = 0
-        end
-        
+    def clampToScreen
         if @x < 0
             @x = SCREEN_SIZE - 1
         end
@@ -67,6 +58,19 @@ class Snake < Drawable
         if @y >= SCREEN_SIZE
             @y = 0
         end
+    end
+
+    def update
+        @x += dx
+        @y += dy
+
+        if checkCollision @x, @y
+            @tail = INITIAL_TAIL
+            @x = @y = 10
+            @dx = @dy = 0
+        end
+        
+        clampToScreen
 
         @trail << Struct.new(:x, :y).new(@x, @y)
         while @trail.length > @tail
