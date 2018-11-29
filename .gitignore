@@ -2,4 +2,5 @@
 **/package-lock.json
 **/bin
 **/obj
+**/build
 typescript/snake.js
