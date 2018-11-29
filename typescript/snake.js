@@ -3,14 +3,12 @@ var SPRITE_SIZE = 20;
 var SCREEN_SIZE = 20;
 var INITIAL_TAIL = 5;
 var FPS = 15;
-var surface;
-var ctx;
-var Point = (function () {
+var Point = /** @class */ (function () {
     function Point() {
     }
     return Point;
 }());
-var Apple = (function () {
+var Apple = /** @class */ (function () {
     function Apple() {
         this.x = 3;
         this.y = 3;
@@ -18,13 +16,13 @@ var Apple = (function () {
         this.height = SPRITE_SIZE - 1;
         this.color = 'red';
     }
-    Apple.prototype.draw = function () {
+    Apple.prototype.draw = function (ctx) {
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x * SPRITE_SIZE + 1, this.y * SPRITE_SIZE + 1, this.width, this.height);
     };
     return Apple;
 }());
-var Snake = (function () {
+var Snake = /** @class */ (function () {
     function Snake() {
         this.x = 10;
         this.y = 10;
@@ -58,7 +56,7 @@ var Snake = (function () {
             this.trail.shift();
         }
     };
-    Snake.prototype.draw = function () {
+    Snake.prototype.draw = function (ctx) {
         var _this = this;
         ctx.fillStyle = this.color;
         this.trail.forEach(function (element) {
@@ -67,10 +65,14 @@ var Snake = (function () {
     };
     return Snake;
 }());
-var SnakeGame = (function () {
+var SnakeGame = /** @class */ (function () {
     function SnakeGame() {
         this.apple = new Apple();
         this.snake = new Snake();
+        this.surface = document.getElementById("surface");
+        this.ctx = this.surface.getContext("2d");
+        this.width = this.surface.clientWidth;
+        this.height = this.surface.clientHeight;
         document.addEventListener("keydown", this.keyPush);
         setInterval(this.gameLoop, 1000 / FPS);
     }
@@ -113,11 +115,14 @@ var SnakeGame = (function () {
             this.generateApple();
         }
     };
+    // clearScreen() : void {
+    //     this.ctx.fillStyle = "black";
+    //     this.ctx.fillRect(0, 0, this.width, this.height);
+    // }
     SnakeGame.prototype.draw = function () {
-        ctx.fillStyle = "black";
-        ctx.fillRect(0, 0, surface.width, surface.height);
-        this.snake.draw();
-        this.apple.draw();
+        // this.clearScreen();
+        this.snake.draw(this.ctx);
+        this.apple.draw(this.ctx);
     };
     SnakeGame.prototype.gameLoop = function () {
         this.update();
@@ -126,7 +131,5 @@ var SnakeGame = (function () {
     return SnakeGame;
 }());
 window.onload = function () {
-    surface = document.getElementById("surface");
-    ctx = surface.getContext("2d");
     var game = new SnakeGame();
 };

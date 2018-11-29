@@ -4,9 +4,6 @@ const SCREEN_SIZE = 20
 const INITIAL_TAIL = 5
 const FPS = 15;
 
-var surface: any;
-var ctx: any;
-
 class Point {
     x: number;
     y: number;
@@ -20,7 +17,7 @@ class Apple {
     height: number = SPRITE_SIZE - 1;
     color: string = 'red';
 
-    draw(): void {
+    draw(ctx: any): void {
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x * SPRITE_SIZE + 1, this.y * SPRITE_SIZE + 1, this.width, this.height);
     }
@@ -64,7 +61,7 @@ class Snake {
         }
     }
 
-    draw(): void {
+    draw(ctx: any): void {
         ctx.fillStyle = this.color;
         this.trail.forEach(element => {
             ctx.fillRect(element.x * SPRITE_SIZE + 1, element.y * SPRITE_SIZE + 1, this.width, this.height);
@@ -75,16 +72,24 @@ class Snake {
 class SnakeGame {
     apple: Apple;
     snake: Snake;
-
+    width: number;
+    height: number;
+    ctx: CanvasRenderingContext2D;
+    surface: HTMLCanvasElement;
+        
     constructor() {
         this.apple = new Apple();
         this.snake = new Snake();
 
-        document.addEventListener("keydown", this.keyPush);
+        this.surface = <HTMLCanvasElement>document.getElementById("surface");
+        this.ctx = this.surface.getContext("2d");
+        this.width = this.surface.clientWidth;
+        this.height = this.surface.clientHeight;
+        document.addEventListener("keydown", this.keyDown);
         setInterval(this.gameLoop, 1000 / FPS);
     }
 
-    keyPush(evt) {
+    keyDown(evt) : void {
         if(this.snake.dx == 0) {
             switch(evt.keyCode){
                 case 37:
@@ -111,14 +116,14 @@ class SnakeGame {
         }
     }
 
-    generateApple(): void {
+    generateApple() : void {
         do {
             this.apple.x = Math.floor(Math.random() * SCREEN_SIZE);
             this.apple.y = Math.floor(Math.random() * SCREEN_SIZE);
-        } while(this.snake.checkCollision(this.apple.x, this.apple.y))
+        } while(this.snake.checkCollision(this.apple.x, this.apple.y));
     }
 
-    update() {
+    update() : void {
         this.snake.update();
         if(this.snake.checkCollision(this.apple.x, this.apple.y)){
             this.snake.tail++;
@@ -126,22 +131,23 @@ class SnakeGame {
         }
     }
 
-    draw() {
-        ctx.fillStyle = "black";
-        ctx.fillRect(0, 0, surface.width, surface.height);
+    // clearScreen() : void {
+    //     this.ctx.fillStyle = "black";
+    //     this.ctx.fillRect(0, 0, this.width, this.height);
+    // }
 
-        this.snake.draw();
-        this.apple.draw();
+    draw() : void {
+        // this.clearScreen();
+        this.snake.draw(this.ctx);
+        this.apple.draw(this.ctx);
     }
 
-     gameLoop() {
+     gameLoop() : void{
         this.update();
         this.draw();
     }
 }
 
 window.onload = function() {
-    surface = document.getElementById("surface");
-    ctx = surface.getContext("2d");
     let game = new SnakeGame();
 }
