@@ -17,7 +17,7 @@ class Apple {
     height: number = SPRITE_SIZE - 1;
     color: string = 'red';
 
-    draw(ctx: any): void {
+    draw(ctx: CanvasRenderingContext2D) : void {
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x * SPRITE_SIZE + 1, this.y * SPRITE_SIZE + 1, this.width, this.height);
     }
@@ -35,7 +35,7 @@ class Snake {
     height: number = SPRITE_SIZE - 1;
     color: string = 'green';
 
-    checkCollision(x: number, y: number): boolean {
+    checkCollision(x: number, y: number) : boolean {
         for(var i = 0; i <this.trail.length; i++){
             if(this.trail[i].x == x && this.trail[i].y == y)
                 return true;
@@ -43,7 +43,7 @@ class Snake {
         return false;
     }
 
-    update(): void {
+    update() : void {
         this.x += this.dx;
         this.y += this.dy;
         this.x = this.x > SCREEN_SIZE -1 ? 0 : this.x < 0 ? SCREEN_SIZE - 1 : this.x;
@@ -61,7 +61,7 @@ class Snake {
         }
     }
 
-    draw(ctx: any): void {
+    draw(ctx: CanvasRenderingContext2D) : void {
         ctx.fillStyle = this.color;
         this.trail.forEach(element => {
             ctx.fillRect(element.x * SPRITE_SIZE + 1, element.y * SPRITE_SIZE + 1, this.width, this.height);
@@ -85,11 +85,21 @@ class SnakeGame {
         this.ctx = this.surface.getContext("2d");
         this.width = this.surface.clientWidth;
         this.height = this.surface.clientHeight;
-        document.addEventListener("keydown", this.keyDown);
-        setInterval(this.gameLoop, 1000 / FPS);
     }
 
-    keyDown(evt) : void {
+    generateApple() : void {
+        do {
+            this.apple.x = Math.floor(Math.random() * SCREEN_SIZE);
+            this.apple.y = Math.floor(Math.random() * SCREEN_SIZE);
+        } while(this.snake.checkCollision(this.apple.x, this.apple.y));
+    }
+
+    clearScreen() : void {
+        this.ctx.fillStyle = "black";
+        this.ctx.fillRect(0, 0, this.width, this.height);
+    }
+
+    handleInput(evt: KeyboardEvent) {
         if(this.snake.dx == 0) {
             switch(evt.keyCode){
                 case 37:
@@ -113,41 +123,36 @@ class SnakeGame {
                 this.snake.dy = 1;
                 break;
             }
-        }
-    }
-
-    generateApple() : void {
-        do {
-            this.apple.x = Math.floor(Math.random() * SCREEN_SIZE);
-            this.apple.y = Math.floor(Math.random() * SCREEN_SIZE);
-        } while(this.snake.checkCollision(this.apple.x, this.apple.y));
+        }    
     }
 
     update() : void {
         this.snake.update();
-        if(this.snake.checkCollision(this.apple.x, this.apple.y)){
+        if(this.snake.checkCollision(this.apple.x, this.apple.y)) {
             this.snake.tail++;
             this.generateApple();
         }
     }
 
-    // clearScreen() : void {
-    //     this.ctx.fillStyle = "black";
-    //     this.ctx.fillRect(0, 0, this.width, this.height);
-    // }
-
     draw() : void {
-        // this.clearScreen();
+        this.clearScreen();
         this.snake.draw(this.ctx);
         this.apple.draw(this.ctx);
     }
+}
 
-     gameLoop() : void{
-        this.update();
-        this.draw();
-    }
+let game = new SnakeGame();
+
+function keyDown(evt) : void {
+    game.handleInput(evt);
+}
+
+function gameLoop() : void {
+    game.update();
+    game.draw();
 }
 
 window.onload = function() {
-    let game = new SnakeGame();
+    document.addEventListener("keydown", keyDown);
+    setInterval(gameLoop, 1000 / FPS);
 }
