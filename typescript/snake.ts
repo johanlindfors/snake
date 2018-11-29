@@ -70,21 +70,17 @@ class Snake {
 }
 
 class SnakeGame {
-    apple: Apple;
-    snake: Snake;
+    apple: Apple = new Apple();
+    snake: Snake = new Snake();
+    ctx: CanvasRenderingContext2D;
     width: number;
     height: number;
-    ctx: CanvasRenderingContext2D;
-    surface: HTMLCanvasElement;
         
     constructor() {
-        this.apple = new Apple();
-        this.snake = new Snake();
-
-        this.surface = <HTMLCanvasElement>document.getElementById("surface");
-        this.ctx = this.surface.getContext("2d");
-        this.width = this.surface.clientWidth;
-        this.height = this.surface.clientHeight;
+        let surface = <HTMLCanvasElement>document.getElementById("surface");
+        this.ctx = surface.getContext("2d");
+        this.width = surface.clientWidth;
+        this.height = surface.clientHeight;
     }
 
     generateApple() : void {
