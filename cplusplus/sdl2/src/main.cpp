@@ -148,20 +148,28 @@ public:
                         return false;
                         break;
                     case SDLK_LEFT:
-						snake->dx = -1;
-						snake->dy = 0;
+                        if(snake->dx == 0) {
+                            snake->dx = -1;
+                            snake->dy = 0;
+                        }
                         break;
                     case SDLK_RIGHT:
-						snake->dx = 1;
-						snake->dy = 0;
-						break;
+                        if(snake->dx == 0) {
+                            snake->dx = 1;
+                            snake->dy = 0;
+                        }
+                        break;
                     case SDLK_DOWN:
-						snake->dx = 0;
-						snake->dy = 1;
+	                    if(snake->dy == 0) {
+                            snake->dx = 0;
+						    snake->dy = 1;
+                        }
 						break;
                     case SDLK_UP:
-						snake->dx = 0;
-						snake->dy = -1;
+						if(snake->dy == 0) {
+                            snake->dx = 0;
+                            snake->dy = -1;
+                        }
 						break;
                     default:
                         break;
