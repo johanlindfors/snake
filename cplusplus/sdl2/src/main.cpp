@@ -25,14 +25,14 @@ void logSDLError(std::ostream &os, const std::string &msg){
 
 class Apple {
 private:
-    int x;
-    int y;
+    int x = 3;
+    int y = 3;
 
 public:
     void draw(SDL_Renderer* renderer) {
         //Render green filled quad
-        SDL_Rect fillRect = { 30, 30, 20, 20 };
-        SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF );
+		SDL_Rect fillRect = { x * SPRITE_SIZE + 1, y * SPRITE_SIZE + 1, SPRITE_SIZE - 1, SPRITE_SIZE - 1 };
+		SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF );
         SDL_RenderFillRect(renderer, &fillRect );//Update the screen
     }
 };
@@ -54,18 +54,19 @@ class Snake {
 private:
     int x;
     int y;
-    int dx;
-    int dy;
     int tail;
     std::list<Point> trail;
 
 public:
+	int dx;
+	int dy;
 
     Snake() {
         trail = std::list<Point>();
         tail = INITIAL_TAIL;
         x = 10;
         y = 10;
+		dx = 0;
         dy = 1;
     }
 
@@ -73,7 +74,8 @@ public:
         x += dx;
         y += dy;
 
-        if(y >= SCREEN_SIZE) y = 0;
+        x = x >= SCREEN_SIZE ? x = 0 : x < 0 ? SCREEN_SIZE -1 : x;
+		y = y >= SCREEN_SIZE ? y = 0 : y < 0 ? SCREEN_SIZE - 1 : y;
 
         trail.push_back(Point(x,y));
         while((int)trail.size() > tail) {
@@ -83,9 +85,11 @@ public:
 
     void draw(SDL_Renderer* renderer) {
         //Render green filled quad
-        SDL_Rect fillRect = { x * SPRITE_SIZE +1, y * SPRITE_SIZE + 1, SPRITE_SIZE - 1, SPRITE_SIZE - 1 };
-        SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 0x00, 0xFF );        
-        SDL_RenderFillRect(renderer, &fillRect );//Update the screen
+		for (Point point : trail) {
+			SDL_Rect fillRect = { point.X * SPRITE_SIZE + 1, point.Y * SPRITE_SIZE + 1, SPRITE_SIZE - 1, SPRITE_SIZE - 1 };
+			SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 0x00, 0xFF);
+			SDL_RenderFillRect(renderer, &fillRect);//Update the screen
+		}
     }
 };
 
@@ -144,13 +148,21 @@ public:
                         return false;
                         break;
                     case SDLK_LEFT:
+						snake->dx = -1;
+						snake->dy = 0;
                         break;
                     case SDLK_RIGHT:
-                        break;
+						snake->dx = 1;
+						snake->dy = 0;
+						break;
                     case SDLK_DOWN:
-                        break;
+						snake->dx = 0;
+						snake->dy = 1;
+						break;
                     case SDLK_UP:
-                        break;
+						snake->dx = 0;
+						snake->dy = -1;
+						break;
                     default:
                         break;
                 }
@@ -167,8 +179,8 @@ public:
         SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF );
         SDL_RenderClear(renderer);
 
-        snake->draw(renderer);
-        apple->draw(renderer);
+		apple->draw(renderer);
+		snake->draw(renderer);
 
         SDL_RenderPresent(renderer);
     }
