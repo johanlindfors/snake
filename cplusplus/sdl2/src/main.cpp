@@ -1,11 +1,18 @@
 #include <iostream>
 #include <memory>
 #include <SDL.h>
-#include <cleanup.h>
 #include <string>
+#include <list>
+#include "cleanup.h"
+#include "timer.hpp"
 
-const int SCREEN_WIDTH  = 640;
-const int SCREEN_HEIGHT = 480;
+const int SPRITE_SIZE = 20;
+const int SCREEN_SIZE = 20;
+const int FRAMES_PER_SECOND = 15;
+const int INITIAL_TAIL = 5;
+
+const int SCREEN_WIDTH  = SPRITE_SIZE * SCREEN_SIZE;
+const int SCREEN_HEIGHT = SPRITE_SIZE * SCREEN_SIZE;
 
 /**
 * Log an SDL error with some error message to the output stream of our choice
@@ -17,6 +24,10 @@ void logSDLError(std::ostream &os, const std::string &msg){
 }
 
 class Apple {
+private:
+    int x;
+    int y;
+
 public:
     void draw(SDL_Renderer* renderer) {
         //Render green filled quad
@@ -26,15 +37,53 @@ public:
     }
 };
 
-class Snake {
+struct Point {
 public:
-    void update() {
+    int X;
+    int Y;
 
+    Point(int x, int y) 
+        : X(x)
+        , Y(y)
+        {
+
+        }
+};
+
+class Snake {
+private:
+    int x;
+    int y;
+    int dx;
+    int dy;
+    int tail;
+    std::list<Point> trail;
+
+public:
+
+    Snake() {
+        trail = std::list<Point>();
+        tail = INITIAL_TAIL;
+        x = 10;
+        y = 10;
+        dy = 1;
+    }
+
+    void update() {
+        x += dx;
+        y += dy;
+
+        if(y >= SCREEN_SIZE) y = 0;
+
+        trail.push_back(Point(x,y));
+        while((int)trail.size() > tail) {
+            trail.pop_front();
+        }
     }
 
     void draw(SDL_Renderer* renderer) {
         //Render green filled quad
-        SDL_Rect fillRect = { 100, 100, 20, 20 };
+        SDL_Rect fillRect = { x * SPRITE_SIZE +1, y * SPRITE_SIZE + 1, SPRITE_SIZE - 1, SPRITE_SIZE - 1 };
         SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 0x00, 0xFF );        
         SDL_RenderFillRect(renderer, &fillRect );//Update the screen
     }
@@ -111,7 +160,7 @@ public:
     }
 
     void update() {
-
+        snake->update();
     }
 
     void draw() {
@@ -125,11 +174,21 @@ public:
     }
 
     void run() {
+        Timer fps;
         bool running = true;
         while (running) {
+            //Start the frame timer
+            fps.start();
+            
             running = handleInput();
             update();
             draw();
+    
+            // we want to cap the frame rate
+            if(fps.get_ticks() < 1000 / FRAMES_PER_SECOND) {
+                //Sleep the remaining frame time
+                SDL_Delay( ( 1000 / FRAMES_PER_SECOND) - fps.get_ticks() );
+            }
         }
     }
 };
