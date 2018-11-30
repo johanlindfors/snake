@@ -2,6 +2,7 @@
 #include <memory>
 #include <SDL.h>
 #include <cleanup.h>
+#include <string>
 
 const int SCREEN_WIDTH  = 640;
 const int SCREEN_HEIGHT = 480;
@@ -143,4 +144,5 @@ int main(int, char**){
     game.run();
 
     SDL_Quit();
+	return 0;
 }
