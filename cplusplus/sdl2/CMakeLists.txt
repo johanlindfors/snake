@@ -26,5 +26,15 @@ find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIR})
 include_directories(include)
 
-add_executable(snake src/main.cpp)
+file(GLOB SNAKE_SOURCES
+    src/*.cpp)
+
+file(GLOB SNAKE_HEADERS
+    include/*.h*)
+
+add_executable(snake ${SNAKE_SOURCES} ${SNAKE_HEADERS})
 target_link_libraries(snake ${SDL2_LIBRARY})
+
+if(WIN32)
+	set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT snake)
+endif()
