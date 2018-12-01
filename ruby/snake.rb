@@ -3,7 +3,7 @@ require 'gosu'
 SCREEN_SIZE = 20
 SPRITE_SIZE = 20
 INITIAL_TAIL = 5
-FPS = 15
+FRAMES_PER_SECOND = 15
 
 class Drawable
     attr_accessor :x, :y
@@ -89,7 +89,7 @@ class SnakeWindow < Gosu::Window
     def initialize
         super SPRITE_SIZE * SCREEN_SIZE, SPRITE_SIZE * SCREEN_SIZE
         self.caption = 'Snake'
-        self.update_interval = 1000/FPS
+        self.update_interval = 1000/FRAMES_PER_SECOND
 
         @apple = Apple.new
         @snake = Snake.new
@@ -131,6 +131,9 @@ class SnakeWindow < Gosu::Window
                 @snake.dx = 0
                 @snake.dy = 1
             end
+        end
+        if Gosu.button_down? Gosu::KB_ESCAPE
+            close
         end
     end
 
