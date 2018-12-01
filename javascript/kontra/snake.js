@@ -45,8 +45,8 @@ let snake = kontra.sprite({
 
     update: function() {
         this.advance();
-        this.x = this.x > SCREEN_SIZE -1 ? 0 : this.x < 0 ? SCREEN_SIZE - 1 : this.x;
-        this.y = this.y > SCREEN_SIZE -1 ? 0 : this.y < 0 ? SCREEN_SIZE - 1 : this.y;                
+        this.x = (this.x + SCREEN_SIZE) % SCREEN_SIZE;
+        this.y = (this.y + SCREEN_SIZE) % SCREEN_SIZE;
 
         this.checkCollision();
 

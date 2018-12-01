@@ -68,11 +68,8 @@ public:
     }
 
     void update() {
-        x += dx;
-        y += dy;
-
-        x = x >= SCREEN_SIZE ? x = 0 : x < 0 ? SCREEN_SIZE -1 : x;
-		y = y >= SCREEN_SIZE ? y = 0 : y < 0 ? SCREEN_SIZE - 1 : y;
+        x = (x + dx + SCREEN_SIZE) % SCREEN_SIZE;
+        y = (y + dy + SCREEN_SIZE) % SCREEN_SIZE;
 
 		if (checkCollision(x, y)) {
 			x = y = 10;

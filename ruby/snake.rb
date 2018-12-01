@@ -44,8 +44,8 @@ class Snake < Drawable
     end
 
     def update
-        @x += dx
-        @y += dy
+        @x = (@x + dx) % SCREEN_SIZE
+        @y = (@y + dy) % SCREEN_SIZE
 
         if checkCollision @x, @y
             @tail = INITIAL_TAIL
@@ -53,9 +53,6 @@ class Snake < Drawable
             @dx = @dy = 0
         end
         
-        @x = @x % SCREEN_SIZE
-        @y = @y % SCREEN_SIZE
-
         @trail << Struct.new(:x, :y).new(@x, @y)
         while @trail.length > @tail
             @trail.shift
