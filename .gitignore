@@ -4,3 +4,5 @@
 **/obj
 **/build
 typescript/snake.js
+**/.vscode
+**/.vs
