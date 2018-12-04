@@ -25,19 +25,30 @@ find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 
 include_directories(common
-					/Users/johanlindfors/dev/thirdparty/vcpkg/installed/x64-osx/include
+#					/Users/johanlindfors/dev/thirdparty/vcpkg/installed/x64-osx/include
 					)
-link_directories(/Users/johanlindfors/dev/thirdparty/vcpkg/installed/x64-osx/lib)
+# link_directories(/Users/johanlindfors/dev/thirdparty/vcpkg/installed/x64-osx/lib)
 
 file(GLOB SNAKE_SOURCES
     src/*.cpp
-	common/*.cpp)
+	common/*.cpp
+)
 
 file(GLOB SNAKE_HEADERS
-    common/*.h*)
+    common/*.h*
+)
 
-add_executable(snake ${SNAKE_SOURCES} ${SNAKE_HEADERS})
-target_link_libraries(snake ${OpenGL_LIBRARY} GL glew glfw glm)
+file(GLOB SNAKE_SHADERS
+	shaders/*.vert
+	shaders/*.frag
+)
+
+file(COPY "${PROJECT_SOURCE_DIR}/shaders/"
+		  DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/shaders"
+)
+
+add_executable(snake ${SNAKE_SOURCES} ${SNAKE_HEADERS} ${SNAKE_SHADERS})
+target_link_libraries(snake ${OpenGL_LIBRARY} GLEW::GLEW glfw glm)
 
 if(WIN32)
 	set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT snake)
