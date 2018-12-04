@@ -53,17 +53,8 @@ def check_pickup(apple, player, trail, tail):
     return tail
 
 def update(player, apple, trail, tail, speed):
-    player.x += speed.x
-    player.y += speed.y
-
-    if player.x < 0:
-        player.x = SCREEN_SIZE - 1
-    if player.y < 0:
-        player.y = SCREEN_SIZE - 1
-    if player.x > SCREEN_SIZE - 1:
-        player.x = 0
-    if player.y > SCREEN_SIZE - 1:
-        player.y = 0
+    player.x = (player.x + speed.x) % SCREEN_SIZE
+    player.y = (player.y + speed.y) % SCREEN_SIZE
 
     if check_collision(player, trail):
         if tail > INITIAL_TAIL:

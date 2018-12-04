@@ -44,10 +44,8 @@ class Snake {
     }
 
     update() : void {
-        this.x += this.dx;
-        this.y += this.dy;
-        this.x = this.x > SCREEN_SIZE -1 ? 0 : this.x < 0 ? SCREEN_SIZE - 1 : this.x;
-        this.y = this.y > SCREEN_SIZE -1 ? 0 : this.y < 0 ? SCREEN_SIZE - 1 : this.y;
+        this.x = (this.x + this.dx + SCREEN_SIZE) % SCREEN_SIZE;
+        this.y = (this.y + this.dy + SCREEN_SIZE) % SCREEN_SIZE;
     
         if(this.checkCollision(this.x, this.y)){
             this.x = this.y = 10;

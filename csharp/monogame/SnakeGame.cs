@@ -44,11 +44,8 @@ namespace WinFormTest
         }
 
         public void Update() {
-            x += dx;
-            y += dy;
-
-            x = x > Constants.SCREEN_SIZE -1 ? 0 : x < 0 ? Constants.SCREEN_SIZE - 1 : x;
-            y = y > Constants.SCREEN_SIZE -1 ? 0 : y < 0 ? Constants.SCREEN_SIZE - 1 : y;
+            x = (x + dx + Constants.SCREEN_SIZE) % Constants.SCREEN_SIZE;
+            y = (y + dy + Constants.SCREEN_SIZE) % Constants.SCREEN_SIZE;
 
             if(CheckCollision(x,y)){
                 x = y = 10;
