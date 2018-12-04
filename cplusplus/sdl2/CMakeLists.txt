@@ -22,7 +22,14 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
 endif()
 
 # Look up SDL2 and add the include directory to our include path
-find_package(SDL2 CONFIG REQUIRED)
+if(WIN32)
+	find_package(SDL2 CONFIG REQUIRED)
+	set(SDL2_LIBRARY SDL2::SDL2 SDL2::SDL2main)
+else()
+	find_package(SDL2 REQUIRED)
+	include_directories(${SDL2_INCLUDE_DIR})
+endif()
+
 include_directories(include)
 
 file(GLOB SNAKE_SOURCES
@@ -32,7 +39,7 @@ file(GLOB SNAKE_HEADERS
     include/*.h*)
 
 add_executable(snake ${SNAKE_SOURCES} ${SNAKE_HEADERS})
-target_link_libraries(snake SDL2::SDL2 SDL2::SDL2main)
+target_link_libraries(snake ${SDL2_LIBRARY})
 
 if(WIN32)
 	set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT snake)
