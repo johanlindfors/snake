@@ -6,6 +6,12 @@ use sdl2::keyboard::Keycode;
 use std::time::Duration;
 use sdl2::video::{Window};
 use sdl2::render::{Canvas};
+use sdl2::rect::{Rect};
+
+const FRAMES_PER_SECOND: u32 = 15;
+const SPRITE_SIZE: u32 = 20;
+const SCREEN_SIZE: u32 = 20;
+const _INITIAL_TAIL: u32 = 5;
 
 fn handle_input(event_pump: &mut sdl2::EventPump) -> bool {
     for event in event_pump.poll_iter() {
@@ -30,7 +36,7 @@ fn update() {
 fn draw(i: u8, canvas: &mut Canvas<Window>) -> u8 {
     let j = (i + 1) % 255;
     canvas.set_draw_color(Color::RGB(j, 64, 255 - j));
-    canvas.clear();
+    canvas.fill_rect(Rect::new(100, 100, SPRITE_SIZE, SPRITE_SIZE));
     return j;
 }
 
@@ -38,7 +44,7 @@ pub fn main() {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
  
-    let window = video_subsystem.window("snake", 400, 400)
+    let window = video_subsystem.window("snake", SPRITE_SIZE * SCREEN_SIZE, SPRITE_SIZE * SCREEN_SIZE)
         .position_centered()
         .build()
         .unwrap();
@@ -59,6 +65,6 @@ pub fn main() {
         update();
         i = draw(i, &mut canvas);
         canvas.present();
-        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
+        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / FRAMES_PER_SECOND));
     }
 }
