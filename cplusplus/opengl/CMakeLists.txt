@@ -35,7 +35,7 @@ file(GLOB SNAKE_SOURCES
 )
 
 file(GLOB SNAKE_HEADERS
-    common/*.h*
+    common/*.h
 )
 
 file(GLOB SNAKE_SHADERS

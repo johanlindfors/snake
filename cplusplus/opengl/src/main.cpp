@@ -13,7 +13,7 @@ GLFWwindow* window;
 #include <glm/glm.hpp>
 using namespace glm;
 
-#include <shader.hpp>
+#include <shader.h>
 
 int main( void )
 {
@@ -60,17 +60,20 @@ int main( void )
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID);
 
+	glViewport(0.0f, 0.0f, 400.0f, 400.0f);
+	glOrtho(0.0f, 400.0f, 0.0f, 400.0f, -10.0f, 100.0f);
+	
 	// Create and compile our GLSL program from the shaders
 	GLuint programID = LoadShaders( "shaders/SimpleShader.vert", "shaders/SimpleShader.frag" );
 
 
 	static const GLfloat g_vertex_buffer_data[] = { 
-		-1.0f, -1.0f, 0.0f,
-		 1.0f, -1.0f, 0.0f,
-		 1.0f,  1.0f, 0.0f,
-		-1.0f,  1.0f, 0.0f,
-		 1.0f,  1.0f, 0.0f,
-		-1.0f, -1.0f, 0.0f,
+		10.0f, 100.0f, 0.0f,
+		100.0f, 10.0f, 0.0f,
+		100.0f,  100.0f, 0.0f,
+		10.0f,  100.0f, 0.0f,
+		100.0f,  100.0f, 0.0f,
+		10.0f, 10.0f, 0.0f,
 		};
 
 	GLuint vertexbuffer;
