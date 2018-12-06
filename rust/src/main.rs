@@ -8,24 +8,87 @@ mod snake {
     use sdl2::rect::{Rect};
     use sdl2::render::{Canvas};
     use sdl2::video::{Window};
+    use std::collections::VecDeque;    
 
     pub const FRAMES_PER_SECOND: u32 = 15;
-    pub const SPRITE_SIZE: u32 = 20;
-    pub const SCREEN_SIZE: u32 = 20;
+    pub const SPRITE_SIZE: i32 = 20;
+    pub const SCREEN_SIZE: i32 = 20;
     pub const _INITIAL_TAIL: u32 = 5;
+
+    struct Position {
+        x: i32,
+        y: i32
+    }
+
+    struct Apple {
+        x: i32,
+        y: i32
+    }
+
+    impl Apple {
+        pub fn draw(&mut self, canvas: &mut Canvas<Window>) {
+            canvas.set_draw_color(Color::RGB(255,0,0));
+            let width = (SPRITE_SIZE - 1) as u32;
+            let height = (SPRITE_SIZE - 1) as u32;
+            canvas.fill_rect(Rect::new(self.x * SPRITE_SIZE + 1, self.y * SPRITE_SIZE + 1, width, height));
+        }
+    }
+
+    struct Snake {
+        pub x: i32,
+        pub y: i32,
+        pub dx: i32,
+        pub dy: i32,        
+        trail: VecDeque<Position>,
+        tail: usize
+    }
+
+    impl Snake {
+
+        // pub fn new() -> Snake {
+        //     let trail: VecDeque<Position> = VecDeque::new();
+            
+        // }
+        
+        pub fn update(&mut self) {
+            self.x = (self.x + SCREEN_SIZE + self.dx) % SCREEN_SIZE;
+            self.y = (self.y + SCREEN_SIZE + self.dy) % SCREEN_SIZE;
+
+            self.trail.push_back(Position {x: self.x, y: self.y});
+            loop {
+                if(self.trail.len() <= self.tail) {
+                    break;
+                }
+                self.trail.pop_front();
+            }
+        }
+
+        pub fn draw(&mut self, canvas: &mut Canvas<Window>) {
+            canvas.set_draw_color(Color::RGB(0,255,0));
+            let width = (SPRITE_SIZE - 1) as u32;
+            let height = (SPRITE_SIZE - 1) as u32;
+            for element in &self.trail {
+                canvas.fill_rect(Rect::new(element.x * SPRITE_SIZE + 1, element.y * SPRITE_SIZE + 1, width, height));
+            }
+        }
+    }
 
     pub struct SnakeGame {
         sdl_context: sdl2::Sdl,
         canvas: Canvas<Window>,
-        event_pump: sdl2::EventPump
+        event_pump: sdl2::EventPump,
+        apple: Apple,
+        snake: Snake
     }
 
     impl SnakeGame {
         pub fn new() -> SnakeGame {
             let context = sdl2::init().unwrap();
             let video_subsystem = context.video().unwrap();
-        
-            let window = video_subsystem.window("snake", SPRITE_SIZE * SCREEN_SIZE, SPRITE_SIZE * SCREEN_SIZE)
+            
+            let width = (SPRITE_SIZE * SCREEN_SIZE) as u32;
+            let height = (SPRITE_SIZE * SCREEN_SIZE) as u32;
+            let window = video_subsystem.window("snake", width, height)
                 .position_centered()
                 .build()
                 .unwrap();
@@ -34,6 +97,8 @@ mod snake {
                 canvas: window.into_canvas().build().unwrap(),
                 event_pump: context.event_pump().unwrap(),
                 sdl_context: context,
+                apple: Apple { x: 3, y: 3},
+                snake: Snake {x:10, y: 10, dx: 0, dy: 0, trail: VecDeque::new(), tail: 5 }
             }
         }
 
@@ -45,7 +110,28 @@ mod snake {
                         return true;
                     },
                     Event::KeyDown { keycode: Some(Keycode::Left), .. } => {
-                        return true;
+                        if(self.snake.dx == 0) {
+                            self.snake.dx = -1;
+                            self.snake.dy = 0;
+                        }
+                    },
+                    Event::KeyDown { keycode: Some(Keycode::Right), .. } => {
+                        if(self.snake.dx == 0) {
+                            self.snake.dx = 1;
+                            self.snake.dy = 0;
+                        }
+                    },
+                    Event::KeyDown { keycode: Some(Keycode::Up), .. } => {
+                        if(self.snake.dy == 0) {
+                            self.snake.dx = 0;
+                            self.snake.dy = -1;
+                        }
+                    },
+                    Event::KeyDown { keycode: Some(Keycode::Down), .. } => {
+                        if(self.snake.dy == 0) {
+                            self.snake.dx = 0;
+                            self.snake.dy = 1;
+                        }
                     },
                     _ => { }
                 }
@@ -54,7 +140,7 @@ mod snake {
         }
 
         pub fn update(&mut self) {
-
+            self.snake.update();
         }
 
         pub fn draw(&mut self) {
@@ -62,8 +148,8 @@ mod snake {
             self.canvas.clear();
             self.canvas.present();
 
-            self.canvas.set_draw_color(Color::RGB(255,0,0));
-            let _result = self.canvas.fill_rect(Rect::new(100, 100, SPRITE_SIZE, SPRITE_SIZE)).unwrap();
+            self.apple.draw(&mut self.canvas);
+            self.snake.draw(&mut self.canvas);
         }
 
         pub fn run(&mut self) {
@@ -73,9 +159,10 @@ mod snake {
                 if self.handle_input() {
                     break 'running;
                 }
-                // The rest of the game loop goes here...
+
                 self.update();
                 self.draw();
+
                 self.canvas.present();
                 ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / FRAMES_PER_SECOND));
             }
