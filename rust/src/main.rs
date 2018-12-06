@@ -1,4 +1,5 @@
 extern crate sdl2; 
+extern crate rand;
 
 mod snake {
     use std::time::Duration;
@@ -8,12 +9,13 @@ mod snake {
     use sdl2::rect::{Rect};
     use sdl2::render::{Canvas};
     use sdl2::video::{Window};
-    use std::collections::VecDeque;    
+    use std::collections::VecDeque;
+    use rand::{Rng};
 
     pub const FRAMES_PER_SECOND: u32 = 15;
     pub const SPRITE_SIZE: i32 = 20;
     pub const SCREEN_SIZE: i32 = 20;
-    pub const _INITIAL_TAIL: u32 = 5;
+    pub const INITIAL_TAIL: usize = 15;
 
     struct Position {
         x: i32,
@@ -49,10 +51,31 @@ mod snake {
         //     let trail: VecDeque<Position> = VecDeque::new();
             
         // }
+
+        pub fn check_collision(&mut self, x: i32, y: i32) -> bool {
+            for element in &self.trail {
+                if element.x == x && element.y == y {
+                    return true;
+                }
+            }
+            return false;
+        }
         
         pub fn update(&mut self) {
-            self.x = (self.x + SCREEN_SIZE + self.dx) % SCREEN_SIZE;
-            self.y = (self.y + SCREEN_SIZE + self.dy) % SCREEN_SIZE;
+            let x = (self.x + SCREEN_SIZE + self.dx) % SCREEN_SIZE;
+            let y = (self.y + SCREEN_SIZE + self.dy) % SCREEN_SIZE;
+            if(self.check_collision(x, y)) {
+                self.tail = INITIAL_TAIL;
+                self.x = 10;
+                self.y = 10;
+                self.dx = 0;
+                self.dy = 0;
+            } else {
+                self.x = x;
+                self.y = y;
+            }
+
+
 
             self.trail.push_back(Position {x: self.x, y: self.y});
             loop {
@@ -98,7 +121,7 @@ mod snake {
                 event_pump: context.event_pump().unwrap(),
                 sdl_context: context,
                 apple: Apple { x: 3, y: 3},
-                snake: Snake {x:10, y: 10, dx: 0, dy: 0, trail: VecDeque::new(), tail: 5 }
+                snake: Snake {x:10, y: 10, dx: 0, dy: 0, trail: VecDeque::new(), tail: INITIAL_TAIL }
             }
         }
 
@@ -141,6 +164,12 @@ mod snake {
 
         pub fn update(&mut self) {
             self.snake.update();
+
+            if(self.snake.check_collision(self.apple.x, self.apple.y)){
+                self.snake.tail += 1;
+                self.apple.x = rand::thread_rng().gen_range(0, SCREEN_SIZE);
+                self.apple.y = rand::thread_rng().gen_range(0, SCREEN_SIZE);
+            }
         }
 
         pub fn draw(&mut self) {
