@@ -26,7 +26,7 @@ fn handle_input(event_pump: &mut sdl2::EventPump) -> bool {
             _ => { }
         }
     }
-    return false;
+    false
 }
 
 fn update() {
@@ -34,10 +34,10 @@ fn update() {
 }
 
 fn draw(i: u8, canvas: &mut Canvas<Window>) -> u8 {
-    let j = (i + 1) % 255;
-    canvas.set_draw_color(Color::RGB(j, 64, 255 - j));
+    let nextIndex = (i + 1) % 255;
+    canvas.set_draw_color(Color::RGB(nextIndex, 64, 255 - nextIndex));
     canvas.fill_rect(Rect::new(100, 100, SPRITE_SIZE, SPRITE_SIZE));
-    return j;
+    nextIndex
 }
 
 pub fn main() {
@@ -55,7 +55,7 @@ pub fn main() {
     canvas.clear();
     canvas.present();
     let mut event_pump = sdl_context.event_pump().unwrap();
-    let mut i = 0;
+    let mut index = 0;
         
     'running: loop {
         if handle_input(&mut event_pump) {
@@ -63,7 +63,7 @@ pub fn main() {
         }
         // The rest of the game loop goes here...
         update();
-        i = draw(i, &mut canvas);
+        index = draw(index, &mut canvas);
         canvas.present();
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / FRAMES_PER_SECOND));
     }
