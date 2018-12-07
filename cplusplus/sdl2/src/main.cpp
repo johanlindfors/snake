@@ -127,10 +127,10 @@ private:
     Apple* apple;
 
 public:
-    Game() {
-        snake = new Snake();
-        apple = new Apple();        
-    }
+    Game()
+        : snake(new Snake())
+        , apple(new Apple())
+    { }
 
     ~Game() {
         SDL_DestroyRenderer(renderer);
