@@ -18,8 +18,17 @@ mod snake {
     pub const INITIAL_TAIL: usize = 5;
 
     pub struct Position {
-        pub x: i32,
-        pub y: i32
+        x: i32,
+        y: i32
+    }
+
+    impl Position {
+        pub fn new(x: i32, y: i32) -> Position {
+            Position {
+                x: x,
+                y: y,
+            }
+        }
     }
 
     struct Apple {
@@ -70,7 +79,7 @@ mod snake {
                 self.y = y;
             }
 
-            self.trail.push_back(Position {x: self.x, y: self.y});
+            self.trail.push_back(Position::new(self.x, self.y));
             loop {
                 if self.trail.len() <= self.tail {
                     break;
@@ -218,7 +227,7 @@ mod test {
     fn test_collision_with_element_in_trail() {
         // arrange
         let mut snake = Snake {x:10, y: 10, dx: 0, dy: 0, trail: VecDeque::new(), tail: 5 };
-        snake.trail.push_back(Position {x: 2, y: 2});
+        snake.trail.push_back(Position::new(2,2));
         // act
         let result = snake.check_collision(2,2);
         // assert
