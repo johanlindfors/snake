@@ -17,9 +17,9 @@ mod snake {
     pub const SCREEN_SIZE: i32 = 20;
     pub const INITIAL_TAIL: usize = 5;
 
-    struct Position {
-        x: i32,
-        y: i32
+    pub struct Position {
+        pub x: i32,
+        pub y: i32
     }
 
     struct Apple {
@@ -36,13 +36,13 @@ mod snake {
         }
     }
 
-    struct Snake {
+    pub struct Snake {
         pub x: i32,
         pub y: i32,
         pub dx: i32,
         pub dy: i32,        
-        trail: VecDeque<Position>,
-        tail: usize
+        pub trail: VecDeque<Position>,
+        pub tail: usize
     }
 
     impl Snake {
@@ -197,4 +197,31 @@ mod snake {
 pub fn main() {
     let mut snake_game = snake::SnakeGame::new();
     snake_game.run();    
+}
+
+#[cfg(test)] 
+mod test {
+    use std::collections::{VecDeque};
+    use snake::{Snake,Position};
+
+    #[test]
+    fn test_collision_empty_trail() {
+        // arrange
+        let mut snake = Snake {x:10, y: 10, dx: 0, dy: 0, trail: VecDeque::new(), tail: 5 };
+        // act
+        let result = snake.check_collision(0,0);
+        // assert
+        assert_eq!(result, false);
+    }
+
+    #[test]
+    fn test_collision_with_element_in_trail() {
+        // arrange
+        let mut snake = Snake {x:10, y: 10, dx: 0, dy: 0, trail: VecDeque::new(), tail: 5 };
+        snake.trail.push_back(Position {x: 2, y: 2});
+        // act
+        let result = snake.check_collision(2,2);
+        // assert
+        assert_eq!(result, true);
+    }
 }
