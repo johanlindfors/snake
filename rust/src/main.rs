@@ -41,7 +41,9 @@ mod snake {
             canvas.set_draw_color(Color::RGB(255,0,0));
             let width = (SPRITE_SIZE - 1) as u32;
             let height = (SPRITE_SIZE - 1) as u32;
-            let _result = canvas.fill_rect(Rect::new(self.x * SPRITE_SIZE + 1, self.y * SPRITE_SIZE + 1, width, height)).unwrap();
+            canvas.fill_rect(
+                Rect::new(self.x * SPRITE_SIZE + 1, self.y * SPRITE_SIZE + 1, width, height))
+                .expect("Failed to draw the apple");
         }
     }
 
@@ -93,7 +95,9 @@ mod snake {
             let width = (SPRITE_SIZE - 1) as u32;
             let height = (SPRITE_SIZE - 1) as u32;
             for element in &self.trail {
-                let _result = canvas.fill_rect(Rect::new(element.x * SPRITE_SIZE + 1, element.y * SPRITE_SIZE + 1, width, height)).unwrap();
+                canvas.fill_rect(
+                    Rect::new(element.x * SPRITE_SIZE + 1, element.y * SPRITE_SIZE + 1, width, height))
+                    .expect("Failed to draw the snake");
             }
         }
     }
