@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
 
-namespace WinFormTest
+namespace Snake
 {
     public static class Constants {
         public const int SPRITE_SIZE = 20;
