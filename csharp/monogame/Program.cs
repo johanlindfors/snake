@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WinFormTest
+namespace Snake
 {
     public static class Program
     {

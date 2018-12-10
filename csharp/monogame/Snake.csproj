@@ -13,15 +13,6 @@
 
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.WindowsDX" version="3.7.0.1708" />
-    <PackageReference Include="SharpDX" version="4.0.1" />
-    <PackageReference Include="SharpDX.Direct2D1" version="4.0.1" />
-    <PackageReference Include="SharpDX.Direct3D11" version="4.0.1"  />
-    <PackageReference Include="SharpDX.Direct3D9" version="4.0.1" />
-    <PackageReference Include="SharpDX.DXGI" version="4.0.1" />
-    <PackageReference Include="SharpDX.Mathematics" version="4.0.1" />
-    <PackageReference Include="SharpDX.MediaFoundation" version="4.0.1" />
-    <PackageReference Include="SharpDX.XAudio2" version="4.0.1" />
-    <PackageReference Include="SharpDX.XInput" version="4.0.1" />
   </ItemGroup>
 
 </Project>
