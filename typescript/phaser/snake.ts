@@ -169,6 +169,7 @@ const config: GameConfig = {
     width: Constants.SCREEN_SIZE * Constants.SPRITE_SIZE,
     height: Constants.SCREEN_SIZE * Constants.SPRITE_SIZE,
     scene: [SnakeGameScene],
+    fps: { target: Constants.FRAMES_PER_SECOND },
     input: {
         keyboard: true,
         mouse: false,
