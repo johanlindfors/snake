@@ -60,7 +60,6 @@ def update(player, apple, trail, tail, speed):
         if tail > INITIAL_TAIL:
             print(tail - INITIAL_TAIL)
         tail = INITIAL_TAIL
-        trail.clear()
         player.x = MIDDLE
         player.y = MIDDLE
         speed.x = 0
