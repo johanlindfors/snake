@@ -22,8 +22,14 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
 endif()
 
 # Look up SDL2 and add the include directory to our include path
-find_package(SDL2 REQUIRED)
-include_directories(${SDL2_INCLUDE_DIR})
+if(WIN32)
+	find_package(SDL2 CONFIG REQUIRED)
+	set(SDL2_LIBRARY SDL2::SDL2 SDL2::SDL2main)
+else()
+	find_package(SDL2 REQUIRED)
+	include_directories(${SDL2_INCLUDE_DIR})
+endif()
+
 include_directories(include)
 
 file(GLOB SNAKE_SOURCES
