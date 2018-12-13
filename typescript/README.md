@@ -2,7 +2,7 @@
 
 ## Running the sample
 
-Clone the repository and change into the Typescript directory, then generate the snake.js file with the Typescript compiler and the following command
+Clone the repository and change into the Typescript/<engine> directory, then generate the snake.js file with the Typescript compiler and the following command
 
 ```
 tsc snake.ts
