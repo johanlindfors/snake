@@ -22,7 +22,7 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
 endif()
 
 # Look up SDL2 and add the include directory to our include path
-find_package(directxtk REQUIRED)
+find_package(DirectXTK CONFIG REQUIRED)
 include_directories(${directxtk_INCLUDE_DIR})
 include_directories(include)
 
