@@ -11,6 +11,10 @@
 // #include <string>
 #include <windows.h>
 #include "../include/dx.h"
+#include "../include/DeviceResources.h"
+#include "../include/StepTimer.h"
+
+#include <DirectXColors.h>
 
 using namespace KennyKerr;
 using namespace KennyKerr::Direct2D;
@@ -117,20 +121,35 @@ class Game {
   private:
     std::unique_ptr<Snake> snake;
     std::unique_ptr<Apple> apple;
+    std::unique_ptr<DX::DeviceResources> deviceResources;
+    DX::StepTimer timer;
 
   public:
     Game() 
         : snake(std::make_unique<Snake>())
-        , apple(std::make_unique<Apple>()) {}
+        , apple(std::make_unique<Apple>()) {
+            deviceResources = std::make_unique<DX::DeviceResources>();
+        }
 
     ~Game() { }
 
     void Tick() {
-        Update();
+        timer.Tick([&]()
+        {
+            Update();
+        });
         Draw();
     }
 
-    bool Initialize(HWND window) {
+    bool Initialize(HWND window, int width, int height) {
+        deviceResources->SetWindow(window, width, height);
+
+        deviceResources->CreateDeviceResources();
+        //CreateDeviceDependentResources();
+
+        deviceResources->CreateWindowSizeDependentResources();
+        //CreateWindowSizeDependentResources();
+
         return true; 
     }
 
@@ -151,8 +170,23 @@ class Game {
     }
 
     void Draw() {
+        // Clear the window
+        auto context = deviceResources->GetD3DDeviceContext();
+        auto renderTarget = deviceResources->GetRenderTargetView();
+        auto depthStencil = deviceResources->GetDepthStencilView();
+
+        context->ClearRenderTargetView(renderTarget, DirectX::Colors::Black);
+        context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+        context->OMSetRenderTargets(1, &renderTarget, depthStencil);
+
+        // Set the viewport.
+        auto viewport = deviceResources->GetScreenViewport();
+        context->RSSetViewports(1, &viewport);
+
         apple->draw();
         snake->draw();
+
+        deviceResources->Present();
     }
 };
 
@@ -219,7 +253,7 @@ int main(int, char **) {
                  width, height, nullptr, nullptr, nullptr, nullptr);
 
     auto game = std::make_unique<Game>();
-    if(game->Initialize(window)) {
+    if(game->Initialize(window, SCREEN_WIDTH, SCREEN_HEIGHT)) {
         MSG message = {};
         while (WM_QUIT != message.message)
         {

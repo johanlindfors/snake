@@ -28,6 +28,7 @@ file(GLOB SNAKE_HEADERS
     include/*.h*)
 
 add_executable(snake ${SNAKE_SOURCES} ${SNAKE_HEADERS})
+target_link_libraries(snake d3d11.lib)
 
 if(WIN32)
 	set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT snake)
