@@ -9,7 +9,7 @@
 #include <list>
 // #include <memory>
 // #include <string>
-
+#include <windows.h>
 #include "../include/dx.h"
 
 using namespace KennyKerr;
@@ -32,8 +32,7 @@ const int INITIAL_TAIL = 5;
 const int SCREEN_WIDTH = SPRITE_SIZE * SCREEN_SIZE;
 const int SCREEN_HEIGHT = SPRITE_SIZE * SCREEN_SIZE;
 
-struct Point
-{
+struct Point {
   public:
     int X;
     int Y;
@@ -41,8 +40,7 @@ struct Point
     Point(int x, int y) : X(x), Y(y) {}
 };
 
-class Snake
-{
+class Snake {
   private:
     int x;
     int y;
@@ -53,8 +51,7 @@ class Snake
     int dx;
     int dy;
 
-    Snake()
-    {
+    Snake() {
         trail = std::list<Point>();
         tail = INITIAL_TAIL;
         x = 10;
@@ -63,120 +60,103 @@ class Snake
         dy = 1;
     }
 
-    bool checkCollision(int x, int y)
-    {
-        for (Point point : trail)
-        {
-            if (point.X == x && point.Y == y)
-            {
+    bool checkCollision(int x, int y) {
+        for (Point point : trail) {
+            if (point.X == x && point.Y == y) {
                 return true;
             }
         }
         return false;
     }
 
-    void update()
-    {
+    void update() {
         x = (x + dx + SCREEN_SIZE) % SCREEN_SIZE;
         y = (y + dy + SCREEN_SIZE) % SCREEN_SIZE;
 
-        if (checkCollision(x, y))
-        {
+        if (checkCollision(x, y)) {
             x = y = 10;
             dx = dy = 0;
             tail = INITIAL_TAIL;
         }
 
         trail.push_back(Point(x, y));
-        while ((int)trail.size() > tail)
-        {
+        while ((int)trail.size() > tail) {
             trail.pop_front();
         }
     }
 
-    void draw()
-    {
+    void draw() {
         // Render green filled quad
-        for (Point point : trail)
-        {
+        for (Point point : trail) {
         }
     }
 };
 
-class Apple
-{
+class Apple {
   public:
     int x;
     int y;
 
-    Apple()
-    {
+    Apple() {
         x = 3;
         y = 3;
         std::srand(std::time(nullptr));
     }
 
-    void reposition(Snake *snake)
-    {
-        do
-        {
-            x = std::rand() % SCREEN_SIZE;
-            y = std::rand() % SCREEN_SIZE;
-        } while (snake->checkCollision(x, y));
+    void reposition(int x, int y) {
+        this->x = x;
+        this->y = y;
     }
 
-    void draw()
-    {
+    void draw() {
         // Render red filled quad
     }
 };
 
-class Game
-{
+class Game {
   private:
-    Snake *snake;
-    Apple *apple;
+    std::unique_ptr<Snake> snake;
+    std::unique_ptr<Apple> apple;
 
   public:
-    Game() : snake(new Snake()), apple(new Apple()) {}
+    Game() 
+        : snake(std::make_unique<Snake>())
+        , apple(std::make_unique<Apple>()) {}
 
-    ~Game()
-    {
-        if (apple)
-            delete (apple);
-        if (snake)
-            delete (snake);
-    }
+    ~Game() { }
 
-    void Tick()
-    {
+    void Tick() {
         Update();
         Draw();
     }
 
-    bool Initialize() { return true; }
+    bool Initialize(HWND window) {
+        return true; 
+    }
 
     bool HandleInput() { return true; }
 
-    void Update()
-    {
+    void Update() {
         snake->update();
-        if (snake->checkCollision(apple->x, apple->y))
-        {
+        if (snake->checkCollision(apple->x, apple->y)) {
             snake->tail++;
-            apple->reposition(snake);
+            int x = 0;
+            int y = 0;
+            do {
+                x = std::rand() % SCREEN_SIZE;
+                y = std::rand() % SCREEN_SIZE;
+            } while (snake->checkCollision(x, y));
+            apple->reposition(x, y);
         }
     }
 
-    void Draw()
-    {
+    void Draw() {
         apple->draw();
         snake->draw();
     }
 };
 
-int main(int, char **)
-{
+int main(int, char **) {
     ComInitialize com;
 
     factory = CreateFactory();
@@ -227,19 +207,34 @@ int main(int, char **)
 
     RegisterClass(&wc);
 
-    CreateWindow(wc.lpszClassName, L"dx.codeplex.com",
+    RECT rect = { 0, 0, static_cast<LONG>(SCREEN_WIDTH), static_cast<LONG>(SCREEN_HEIGHT) };
+
+    AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
+
+    auto width = rect.right - rect.left;
+    auto height = rect.bottom - rect.top;
+
+    auto window = CreateWindow(wc.lpszClassName, L"Snake written in C++ with dx.h",
                  WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT,
-                 CW_USEDEFAULT, CW_USEDEFAULT, nullptr, nullptr, nullptr, nullptr);
+                 width, height, nullptr, nullptr, nullptr, nullptr);
 
-    MSG message;
-    BOOL result;
-
-    while (result = GetMessage(&message, 0, 0, 0))
-    {
-        if (-1 != result)
-            DispatchMessage(&message);
+    auto game = std::make_unique<Game>();
+    if(game->Initialize(window)) {
+        MSG message = {};
+        while (WM_QUIT != message.message)
+        {
+            if (PeekMessage(&message, nullptr, 0, 0, PM_REMOVE))
+            {
+                TranslateMessage(&message);
+                DispatchMessage(&message);
+            }
+            else
+            {
+                game->Tick();
+            }
+        }
     }
-
     // ReleaseDevice();
     factory.Reset();
+    game.reset();
 }
