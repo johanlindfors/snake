@@ -3,16 +3,12 @@
 #define UNICODE
 #endif
 
-// #include <cstdlib>
-#include <ctime>
-// #include <iostream>
-#include <list>
-// #include <memory>
-// #include <string>
-// #include "../include/DeviceResources.h"
 #include "../include/StepTimer.h"
 #include "../include/dx.h"
+#include <ctime>
+#include <list>
 #include <windows.h>
+
 
 using namespace KennyKerr;
 using namespace KennyKerr::Direct2D;
