@@ -182,7 +182,40 @@ public:
     return true;
   }
 
-  bool HandleInput() { return true; }
+  bool HandleInput(WPARAM key) {
+    switch (key) {
+    case VK_LEFT:
+      if (snake->dx == 0) {
+        snake->dx = -1;
+        snake->dy = 0;
+      }
+      break;
+
+    case VK_RIGHT:
+      if (snake->dx == 0) {
+        snake->dx = 1;
+        snake->dy = 0;
+      }
+      break;
+
+    case VK_UP:
+      if (snake->dy == 0) {
+        snake->dx = 0;
+        snake->dy = -1;
+      }
+      break;
+
+    case VK_DOWN:
+      if (snake->dy == 0) {
+        snake->dx = 0;
+        snake->dy = 1;
+      }
+      break;
+
+    defult:
+      return true;
+    }
+  }
 
   void Update() {
     snake->Update();
@@ -226,34 +259,27 @@ int main(int, char **) {
 
   wc.lpfnWndProc = [](HWND window, UINT message, WPARAM wparam,
                       LPARAM lparam) -> LRESULT {
-    if (WM_PAINT == message) {
+    auto game =
+        reinterpret_cast<Game *>(GetWindowLongPtr(window, GWLP_USERDATA));
+
+    switch (message) {
+    case WM_PAINT:
       PAINTSTRUCT ps;
       VERIFY(BeginPaint(window, &ps));
-      // Render(window);
       EndPaint(window, &ps);
       return 0;
-    }
 
-    // if (WM_SIZE == message) {
-    //   if (target && SIZE_MINIMIZED != wparam) {
-    //     // ResizeSwapChainBitmap();
-    //     // Render(window);
-    //   }
-
-    //   return 0;
-    // }
-
-    if (WM_DISPLAYCHANGE == message) {
-      // Render(window);
-      return 0;
-    }
-
-    if (WM_DESTROY == message) {
+    case WM_DESTROY:
       PostQuitMessage(0);
       return 0;
-    }
 
-    return DefWindowProc(window, message, wparam, lparam);
+    case WM_KEYDOWN:
+      game->HandleInput(wparam);
+      return 0;
+
+    default:
+      return DefWindowProc(window, message, wparam, lparam);
+    }
   };
 
   RegisterClass(&wc);
@@ -272,6 +298,9 @@ int main(int, char **) {
       height, nullptr, nullptr, nullptr, nullptr);
 
   auto game = std::make_unique<Game>();
+  SetWindowLongPtr(window, GWLP_USERDATA,
+                   reinterpret_cast<LONG_PTR>(game.get()));
+
   if (game->Initialize(window, SCREEN_WIDTH, SCREEN_HEIGHT)) {
     MSG message = {};
     while (WM_QUIT != message.message) {
