@@ -5745,7 +5745,10 @@ namespace KennyKerr
         inline void BitmapFrameEncode::WriteSource(BitmapSource const & source,
                                                    RectU const & rect) const
         {
-            WICRect wrect = { rect.Left, rect.Top, rect.Width(), rect.Height() };
+            WICRect wrect = { static_cast<int>(rect.Left),
+                              static_cast<int>(rect.Top),
+                              static_cast<int>(rect.Width()),
+                              static_cast<int>(rect.Height()) };
 
             HR((*this)->WriteSource(source.Get(),
                                     &wrect));
