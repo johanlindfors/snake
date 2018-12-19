@@ -58,9 +58,9 @@ public:
     brush = target.CreateSolidColorBrush(COLOR_GREEN);
   }
 
-  bool CheckCollision(int x, int y) {
+  bool CheckCollision(int objx, int objy) {
     for (Point point : trail) {
-      if (point.X == x && point.Y == y) {
+      if (point.X == objx && point.Y == objy) {
         return true;
       }
     }
@@ -86,10 +86,10 @@ public:
   void Draw(DeviceContext target) {
     // Render green filled quad
     for (Point point : trail) {
-      auto left = point.X * SPRITE_SIZE + 1;
-      auto top = point.Y * SPRITE_SIZE + 1;
-      auto right = left + SPRITE_SIZE - 1;
-      auto bottom = top + SPRITE_SIZE - 1;
+      auto left = point.X * SPRITE_SIZE + 1.f;
+      auto top = point.Y * SPRITE_SIZE + 1.f;
+      auto right = left + SPRITE_SIZE - 1.f;
+      auto bottom = top + SPRITE_SIZE - 1.f;
       target.FillRectangle(RectF(left, top, right, bottom), brush);
     }
   }
@@ -106,23 +106,23 @@ public:
   Apple() {
     x = 3;
     y = 3;
-    std::srand(std::time(nullptr));
+    std::srand(static_cast<unsigned int>(std::time(nullptr)));
   }
 
   void Initialize(DeviceContext target) {
     brush = target.CreateSolidColorBrush(COLOR_RED);
   }
 
-  void Reposition(int x, int y) {
-    this->x = x;
-    this->y = y;
+  void Reposition(int newx, int newy) {
+    this->x = newx;
+    this->y = newy;
   }
 
   void Draw(DeviceContext target) {
-    auto left = this->x * SPRITE_SIZE + 1;
-    auto top = this->y * SPRITE_SIZE + 1;
-    auto right = left + SPRITE_SIZE - 1;
-    auto bottom = top + SPRITE_SIZE - 1;
+    auto left = this->x * SPRITE_SIZE + 1.f;
+    auto top = this->y * SPRITE_SIZE + 1.f;
+    auto right = left + SPRITE_SIZE - 1.f;
+    auto bottom = top + SPRITE_SIZE - 1.f;
     target.FillRectangle(RectF(left, top, right, bottom), brush);
   }
 };
@@ -149,11 +149,13 @@ public:
   ~Game() { factory.Reset(); }
 
   void Tick() {
-    timer.Tick([&]() { Update(); });
-    Draw();
+    timer.Tick([&]() { 
+      Update();
+      Draw();
+    });  
   }
 
-  bool Initialize(HWND window, int width, int height) {
+  bool Initialize(HWND window) {
     auto device = Direct3D::CreateDevice();
     target = factory.CreateDevice(device).CreateDeviceContext();
     auto dxgi = device.GetDxgiFactory();
@@ -185,31 +187,34 @@ public:
         snake->dx = -1;
         snake->dy = 0;
       }
-      break;
+      return false;
 
     case VK_RIGHT:
       if (snake->dx == 0) {
         snake->dx = 1;
         snake->dy = 0;
       }
-      break;
+      return false;
 
     case VK_UP:
       if (snake->dy == 0) {
         snake->dx = 0;
         snake->dy = -1;
       }
-      break;
+      return false;
 
     case VK_DOWN:
       if (snake->dy == 0) {
         snake->dx = 0;
         snake->dy = 1;
       }
-      break;
+      return false;
 
-    defult:
+    case VK_ESCAPE:
       return true;
+
+    default:
+      return false;
     }
   }
 
@@ -270,7 +275,9 @@ int main(int, char **) {
       return 0;
 
     case WM_KEYDOWN:
-      game->HandleInput(wparam);
+      if(game->HandleInput(wparam)) {
+        PostQuitMessage(0);
+      }
       return 0;
 
     default:
@@ -297,7 +304,7 @@ int main(int, char **) {
   SetWindowLongPtr(window, GWLP_USERDATA,
                    reinterpret_cast<LONG_PTR>(game.get()));
 
-  if (game->Initialize(window, SCREEN_WIDTH, SCREEN_HEIGHT)) {
+  if (game->Initialize(window)) {
     MSG message = {};
     while (WM_QUIT != message.message) {
       if (PeekMessage(&message, nullptr, 0, 0, PM_REMOVE)) {
