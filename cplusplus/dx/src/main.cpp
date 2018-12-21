@@ -8,7 +8,7 @@
 #include <ctime>
 #include <list>
 #include <windows.h>
-
+#include <functional>
 
 using namespace KennyKerr;
 using namespace KennyKerr::Direct2D;
@@ -31,6 +31,29 @@ public:
   int Y;
 
   Point(int x, int y) : X(x), Y(y) {}
+};
+
+class Timer {
+private:
+  Wam::SimpleTimer timer;
+  double lastTime;
+  double targetElapsedMilliseconds;
+
+public:
+
+  void SetTarget(double target) {
+    targetElapsedMilliseconds = target;
+    lastTime = timer.GetTime();
+  }
+
+  void Tick(const std::function<void()>& tickCallback) {
+    auto now = timer.GetTime();
+    auto delta = now - lastTime;
+      if(delta >= targetElapsedMilliseconds) { 
+      tickCallback();
+      lastTime = now;
+    }
+  }
 };
 
 class Snake {
@@ -137,13 +160,13 @@ private:
   Dxgi::SwapChain1 swapChain;
   DirectWrite::TextLayout textLayout;
 
-  DX::StepTimer timer;
+  Timer timer;
 
 public:
   Game() : snake(std::make_unique<Snake>()), apple(std::make_unique<Apple>()) {
     factory = CreateFactory();
-    timer.SetFixedTimeStep(true);
-    timer.SetTargetElapsedSeconds(1.f / 15.f);
+    //timer.SetFixedTimeStep(true);
+    timer.SetTarget(1.f / FRAMES_PER_SECOND);
   }
 
   ~Game() { factory.Reset(); }
@@ -151,8 +174,8 @@ public:
   void Tick() {
     timer.Tick([&]() { 
       Update();
-      Draw();
     });  
+    Draw();
   }
 
   bool Initialize(HWND window) {

@@ -4,6 +4,8 @@
 #include <list>
 #include <ctime>
 #include <memory>
+#include <windows.h>
+#include <functional>
 
 // Include GLEW
 #include <GL/glew.h>
@@ -45,11 +47,46 @@ public:
   Point(int x, int y) : X(x), Y(y) {}
 };
 
+
+glm::mat4 CreateOrthoMatrix() {
+  glm::mat4 orthomatrix;
+
+  auto right = 400;
+  auto left = 0;
+  auto top = 0;
+  auto bottom = 400;
+  auto Zfar = 10;
+  auto Znear = 0;
+
+  orthomatrix[0].x = 2.0/(right-left);
+  orthomatrix[0].y = 0;
+  orthomatrix[0].z = 0;
+  orthomatrix[0].w = 0;
+
+  orthomatrix[1].x = 0;
+  orthomatrix[1].y = 2.0/(top-bottom);
+  orthomatrix[1].z = 0;
+  orthomatrix[1].w = 0;
+
+  orthomatrix[2].x = 0;
+  orthomatrix[2].y = 0;
+  orthomatrix[2].z = 2.0/(Zfar-Znear);
+  orthomatrix[2].w = 0;
+
+  orthomatrix[3].x = -(right+left)/(right-left);
+  orthomatrix[3].y = -(top+bottom)/(top-bottom);
+  orthomatrix[3].z = -(Zfar+Znear)/(Zfar-Znear);
+  orthomatrix[3].w = 1;
+
+  return orthomatrix;
+}
+
 class Snake {
 private:
   int x;
   int y;
   std::list<Point> trail;
+  GLuint matrixId;
 
 public:
   int tail;
@@ -65,8 +102,8 @@ public:
     dy = 1;
   }
 
-  void Initialize() {
-
+  void Initialize(GLuint programID) {
+    matrixId = glGetUniformLocation(programID, "MVP");
   }
 
   bool CheckCollision(int x, int y) {
@@ -96,17 +133,27 @@ public:
 
   void Draw() {
     // Render green filled quad
+    auto orthomatrix = CreateOrthoMatrix();
+
     for (Point point : trail) {
       auto left = point.X * SPRITE_SIZE + 1;
       auto top = point.Y * SPRITE_SIZE + 1;
-      auto right = left + SPRITE_SIZE - 1;
-      auto bottom = top + SPRITE_SIZE - 1;
 
+      glm::mat4 mvp = glm::translate(orthomatrix, glm::vec3(left, top, 0.0f));
+
+      // Send our transformation to the currently bound shader, in the "MVP" uniform
+      // This is done in the main loop since each model will have a different MVP matrix (At least for the M part)
+      glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mvp[0][0]);
+
+      // Draw the triangle !
+      glDrawArrays(GL_TRIANGLES, 0, 6); // 3 indices starting at 0 -> 1 triangle
     }
   }
 };
 
 class Apple {
+private:
+  GLuint matrixId;
 
 public:
   int x;
@@ -118,8 +165,8 @@ public:
     std::srand(std::time(nullptr));
   }
 
-  void Initialize() {
-
+  void Initialize(GLuint programID) {
+    matrixId = glGetUniformLocation(programID, "MVP");
   }
 
   void Reposition(int x, int y) {
@@ -128,34 +175,82 @@ public:
   }
 
   void Draw() {
-    auto left = this->x * SPRITE_SIZE + 1;
-    auto top = this->y * SPRITE_SIZE + 1;
-    auto right = left + SPRITE_SIZE - 1;
-    auto bottom = top + SPRITE_SIZE - 1;
+    auto left = this->x * SPRITE_SIZE + 1.f;
+    auto top = this->y * SPRITE_SIZE + 1.f;
+    
+    auto orthomatrix = CreateOrthoMatrix();
+
+    glm::mat4 mvp = glm::translate(orthomatrix, glm::vec3(left, top, 0.0f));
+
+		// Send our transformation to the currently bound shader, in the "MVP" uniform
+		// This is done in the main loop since each model will have a different MVP matrix (At least for the M part)
+		glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mvp[0][0]);
+
+		// Draw the triangle !
+		glDrawArrays(GL_TRIANGLES, 0, 6); // 3 indices starting at 0 -> 1 triangle
   }
 };
+
+class Timer {
+private:
+  double lastTime;
+  LARGE_INTEGER frequency;
+  double targetElapsedMilliseconds;
+
+  double GetTime() {
+    LARGE_INTEGER time;
+    QueryPerformanceCounter(&time);
+    return static_cast<double>(time.QuadPart) / frequency.QuadPart;
+  }
+
+public:
+  Timer() { 
+    QueryPerformanceFrequency(&frequency);
+  }
+
+  void SetTarget(double target) {
+    targetElapsedMilliseconds = target;
+    lastTime = GetTime();
+  }
+
+  void Tick(const std::function<void()>& tickCallback) {
+    auto now = GetTime();
+    auto delta = now - lastTime;
+      if(delta >= targetElapsedMilliseconds) { 
+      tickCallback();
+      lastTime = now;
+    }
+  }
+};
+
 
 class Game {
 private:
   std::unique_ptr<Snake> snake;
   std::unique_ptr<Apple> apple;
+  Timer timer;
 
 public:
   Game() 
   	: snake(std::make_unique<Snake>())
-	, apple(std::make_unique<Apple>()) {
+	  , apple(std::make_unique<Apple>()) 
+  {
   }
 
   ~Game() { }
 
   void Tick() {
-	Update();
+    timer.Tick([&]() {
+      Update();
+    });
     Draw();
   }
 
-  bool Initialize() {
-    apple->Initialize();
-    snake->Initialize();
+  bool Initialize(GLuint programID) {
+    apple->Initialize(programID);
+    snake->Initialize(programID);
+
+    timer.SetTarget(1.f / FRAMES_PER_SECOND);
 
     return true;
   }
@@ -216,12 +311,10 @@ public:
   }
 };
 
-
 int main( void )
 {
 	auto game = std::make_unique<Game>();
-	game->Initialize();
-
+	
 	// Initialise GLFW
 	if( !glfwInit() )
 	{
@@ -268,6 +361,8 @@ int main( void )
 	// Create and compile our GLSL program from the shaders
 	GLuint programID = LoadShaders( "shaders/SimpleShader.vert", "shaders/SimpleShader.frag" );
 
+  game->Initialize(programID);
+
 	static const GLfloat g_vertex_buffer_data[] = { 
 		1.0f, 1.0f, 0.0f,
 		1.0f, 20.0f, 0.0f,
@@ -290,42 +385,6 @@ int main( void )
 		glUseProgram(programID);
 		// Get a handle for our "MVP" uniform
 		// Only during the initialisation
-		GLuint MatrixID = glGetUniformLocation(programID, "MVP");
-		glm::mat4 orthomatrix;
-
-		auto right = 400;
-		auto left = 0;
-		auto top = 0;
-		auto bottom = 400;
-		auto Zfar = 10;
-		auto Znear = 0;
-
-		orthomatrix[0].x = 2.0/(right-left);
-        orthomatrix[0].y = 0;
-        orthomatrix[0].z = 0;
-        orthomatrix[0].w = 0;
- 
-        orthomatrix[1].x = 0;
-        orthomatrix[1].y = 2.0/(top-bottom);
-        orthomatrix[1].z = 0;
-        orthomatrix[1].w = 0;
- 
-        orthomatrix[2].x = 0;
-        orthomatrix[2].y = 0;
-        orthomatrix[2].z = 2.0/(Zfar-Znear);
-        orthomatrix[2].w = 0;
- 
-        orthomatrix[3].x = -(right+left)/(right-left);
-        orthomatrix[3].y = -(top+bottom)/(top-bottom);
-        orthomatrix[3].z = -(Zfar+Znear)/(Zfar-Znear);
-        orthomatrix[3].w = 1;
-
-    glm::mat4 mvp = orthomatrix * glm::translate(glm::mat4(1.0), glm::vec3(100.0f, 0.0f, 0.0f));
-
-		// Send our transformation to the currently bound shader, in the "MVP" uniform
-		// This is done in the main loop since each model will have a different MVP matrix (At least for the M part)
-		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
-
 		// 1rst attribute buffer : vertices
 		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -338,8 +397,7 @@ int main( void )
 			(void*)0            // array buffer offset
 		);
 
-		// Draw the triangle !
-		glDrawArrays(GL_TRIANGLES, 0, 6); // 3 indices starting at 0 -> 1 triangle
+    game->Tick();
 
 		glDisableVertexAttribArray(0);
 
