@@ -3,7 +3,6 @@
 #define UNICODE
 #endif
 
-#include "../include/StepTimer.h"
 #include "../include/dx.h"
 #include <ctime>
 #include <list>
