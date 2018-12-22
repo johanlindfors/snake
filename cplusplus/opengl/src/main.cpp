@@ -58,25 +58,25 @@ glm::mat4 CreateOrthoMatrix() {
   auto Zfar = 10;
   auto Znear = 0;
 
-  orthomatrix[0].x = 2.0/(right-left);
+  orthomatrix[0].x = 2.f/(right-left);
   orthomatrix[0].y = 0;
   orthomatrix[0].z = 0;
   orthomatrix[0].w = 0;
 
   orthomatrix[1].x = 0;
-  orthomatrix[1].y = 2.0/(top-bottom);
+  orthomatrix[1].y = 2.f/(top-bottom);
   orthomatrix[1].z = 0;
   orthomatrix[1].w = 0;
 
   orthomatrix[2].x = 0;
   orthomatrix[2].y = 0;
-  orthomatrix[2].z = 2.0/(Zfar-Znear);
+  orthomatrix[2].z = 2.f/(Zfar-Znear);
   orthomatrix[2].w = 0;
 
-  orthomatrix[3].x = -(right+left)/(right-left);
-  orthomatrix[3].y = -(top+bottom)/(top-bottom);
-  orthomatrix[3].z = -(Zfar+Znear)/(Zfar-Znear);
-  orthomatrix[3].w = 1;
+  orthomatrix[3].x = static_cast<float>(-(right+left)/(right-left));
+  orthomatrix[3].y = static_cast<float>(-(top+bottom)/(top-bottom));
+  orthomatrix[3].z = static_cast<float>(-(Zfar+Znear)/(Zfar-Znear));
+  orthomatrix[3].w = 1.f;
 
   return orthomatrix;
 }
@@ -87,6 +87,9 @@ private:
   int y;
   std::list<Point> trail;
   GLuint matrixId;
+  GLuint vertexbuffer;
+  GLuint VertexArrayID;
+  GLuint programId;
 
 public:
   int tail;
@@ -103,12 +106,28 @@ public:
   }
 
   void Initialize(GLuint programID) {
+    glGenVertexArrays(2, &VertexArrayID);
+    glBindVertexArray(VertexArrayID);
+    
+    static const GLfloat g_vertex_buffer_data[] = { 
+       1.0f,  1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+       1.0f, 20.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+      20.0f,  1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+      20.0f,  1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+       1.0f, 20.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+      20.0f, 20.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+    };
+
+    glGenBuffers(2, &vertexbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+
     matrixId = glGetUniformLocation(programID, "MVP");
   }
 
-  bool CheckCollision(int x, int y) {
+  bool CheckCollision(int objx, int objy) {
     for (Point point : trail) {
-      if (point.X == x && point.Y == y) {
+      if (point.X == objx && point.Y == objy) {
         return true;
       }
     }
@@ -132,6 +151,30 @@ public:
   }
 
   void Draw() {
+
+		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+
+		glVertexAttribPointer(
+		  0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+			3,                  // size
+			GL_FLOAT,           // type
+			GL_FALSE,           // normalized?
+			7 * sizeof(float),  // stride
+			(void*)0            // array buffer offset
+		);
+    glEnableVertexAttribArray(0);
+
+    // color attribute
+    glVertexAttribPointer(
+      1, 
+      4, 
+      GL_FLOAT, 
+      GL_FALSE, 
+      7 * sizeof(float), 
+      (void*)(3 * sizeof(float))
+    );
+    glEnableVertexAttribArray(1);
+
     // Render green filled quad
     auto orthomatrix = CreateOrthoMatrix();
 
@@ -148,12 +191,18 @@ public:
       // Draw the triangle !
       glDrawArrays(GL_TRIANGLES, 0, 6); // 3 indices starting at 0 -> 1 triangle
     }
+
+    glDisableVertexAttribArray(2);
+    glDisableVertexAttribArray(3);
   }
 };
 
 class Apple {
 private:
   GLuint matrixId;
+  GLuint vertexbuffer;
+  GLuint VertexArrayID;
+  GLuint programId;
 
 public:
   int x;
@@ -162,19 +211,69 @@ public:
   Apple() {
     x = 3;
     y = 3;
-    std::srand(std::time(nullptr));
+    std::srand(static_cast<unsigned int>(std::time(nullptr)));
+  }
+
+  ~Apple() {
+    // Cleanup VBO
+    glDeleteBuffers(1, &vertexbuffer);
+    glDeleteVertexArrays(1, &VertexArrayID);
   }
 
   void Initialize(GLuint programID) {
-    matrixId = glGetUniformLocation(programID, "MVP");
+    programId = programID;
+
+    glGenVertexArrays(1, &VertexArrayID);
+    glBindVertexArray(VertexArrayID);
+    
+    static const GLfloat g_vertex_buffer_data[] = { 
+       1.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+       1.0f, 20.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+      20.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+      20.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+       1.0f, 20.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+      20.0f, 20.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+    };
+
+    glGenBuffers(1, &vertexbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+
+    matrixId = glGetUniformLocation(programId, "MVP");
   }
 
-  void Reposition(int x, int y) {
-    this->x = x;
-    this->y = y;
+  void Reposition(int newx, int newy) {
+    x = newx;
+    y = newy;
   }
 
   void Draw() {
+ 		// Use our shader
+		glUseProgram(programId);
+		// 1rst attribute buffer : vertices
+    glEnableVertexAttribArray(0);
+		
+		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+		glVertexAttribPointer(
+			0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+			3,                  // size
+			GL_FLOAT,           // type
+			GL_FALSE,           // normalized?
+			7 * sizeof(float),  // stride
+			(void*)0            // array buffer offset
+		);
+
+    // color attribute
+    glVertexAttribPointer(
+      1, 
+      4, 
+      GL_FLOAT, 
+      GL_FALSE, 
+      7 * sizeof(float), 
+      (void*)(3 * sizeof(float))
+    );
+    glEnableVertexAttribArray(1);
+
     auto left = this->x * SPRITE_SIZE + 1.f;
     auto top = this->y * SPRITE_SIZE + 1.f;
     
@@ -188,6 +287,9 @@ public:
 
 		// Draw the triangle !
 		glDrawArrays(GL_TRIANGLES, 0, 6); // 3 indices starting at 0 -> 1 triangle
+
+		glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
   }
 };
 
@@ -351,67 +453,41 @@ int main( void )
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
-	// Dark blue background
+	// Black background
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-	GLuint VertexArrayID;
-	glGenVertexArrays(1, &VertexArrayID);
-	glBindVertexArray(VertexArrayID);
-	
 	// Create and compile our GLSL program from the shaders
 	GLuint programID = LoadShaders( "shaders/SimpleShader.vert", "shaders/SimpleShader.frag" );
 
   game->Initialize(programID);
 
-	static const GLfloat g_vertex_buffer_data[] = { 
-		1.0f, 1.0f, 0.0f,
-		1.0f, 20.0f, 0.0f,
-		20.0f,  1.0f, 0.0f,
-		20.0f,  1.0f, 0.0f,
-		1.0f, 20.0f, 0.0f,
-		20.0f, 20.0f, 0.0f,
-		};
-
-	GLuint vertexbuffer;
-	glGenBuffers(1, &vertexbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
-
 	do{
 		// Clear the screen
 		glClear( GL_COLOR_BUFFER_BIT );
 
-		// Use our shader
-		glUseProgram(programID);
-		// Get a handle for our "MVP" uniform
-		// Only during the initialisation
-		// 1rst attribute buffer : vertices
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-		glVertexAttribPointer(
-			0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-			3,                  // size
-			GL_FLOAT,           // type
-			GL_FALSE,           // normalized?
-			0,                  // stride
-			(void*)0            // array buffer offset
-		);
-
     game->Tick();
-
-		glDisableVertexAttribArray(0);
 
 		// Swap buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
+    if(glfwGetKey(window, GLFW_KEY_LEFT ) == GLFW_PRESS) {
+      game->HandleInput(DIRECTION::Left);
+    }
+    if(glfwGetKey(window, GLFW_KEY_RIGHT ) == GLFW_PRESS) {
+      game->HandleInput(DIRECTION::Right);
+    }
+    if(glfwGetKey(window, GLFW_KEY_UP ) == GLFW_PRESS) {
+      game->HandleInput(DIRECTION::Up);
+    }
+    if(glfwGetKey(window, GLFW_KEY_DOWN ) == GLFW_PRESS) {
+      game->HandleInput(DIRECTION::Down);
+    }
+
 	} // Check if the ESC key was pressed or the window was closed
 	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
 		   glfwWindowShouldClose(window) == 0 );
 
-	// Cleanup VBO
-	glDeleteBuffers(1, &vertexbuffer);
-	glDeleteVertexArrays(1, &VertexArrayID);
 	glDeleteProgram(programID);
 
 	// Close OpenGL window and terminate GLFW

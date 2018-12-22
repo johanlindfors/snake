@@ -1,10 +1,14 @@
 #version 330 core
 
 // Input vertex data, different for all executions of this shader.
-layout(location = 0) in vec3 vert;
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec4 color;
 uniform mat4 MVP;
 
+//Out values
+out vec4 frag_color;
+
 void main(){
-    gl_Position = MVP * vec4(vert.x / 200.0 - 1.0, (200 - vert.y) / 200.0 , 0.0, 1.0);
-    gl_Position.w = 1.0;
+    gl_Position = MVP * vec4(position, 1.0);
+    frag_color = color;
 }
