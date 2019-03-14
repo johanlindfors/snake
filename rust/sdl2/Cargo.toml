@@ -2,6 +2,7 @@
 name = "snake"
 version = "0.1.0"
 authors = ["Johan Lindfors <johan.lindfors@coderox.se>"]
+build = "build.rs"
 
 [dependencies]
 sdl2 = { version = "*", features = ["bundled", "static-link"]}
