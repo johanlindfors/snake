@@ -1,3 +1,5 @@
+#![windows_subsystem="windows"]
+
 extern crate sdl2; 
 extern crate rand;
 
