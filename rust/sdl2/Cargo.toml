@@ -5,5 +5,5 @@ authors = ["Johan Lindfors <johan.lindfors@coderox.se>"]
 build = "build.rs"
 
 [dependencies]
-sdl2 = { version = "*", features = ["bundled", "static-link"]}
+sdl2 = { version = "*", features = ["bundled"]}
 rand = { version = "*" }
