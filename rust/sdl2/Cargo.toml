@@ -4,11 +4,11 @@ version = "0.1.0"
 authors = ["Johan Lindfors <johan.lindfors@coderox.se>"]
 build = "build.rs"
 
-[dependencies.rand]
-version = "*"
+[dependencies]
+rand = { version = "*" }
+sdl2 = { version = "0.32.2", default-features = false }
 
-[target.'cfg(target_os = "macos")'.dependencies]
-sdl2 =  { version = "0.32.2", features = ["bundled"]}
-
-[target.'cfg(target_os = "windows")'.dependencies]
-sdl2 =  { version = "0.32.2", features = ["bundled", "static-link"]}
+[features]
+default = []
+sdl2_mac = ["sdl2/bundled"]
+sdl2_windows = ["sdl2/bundled", "sdl2/static-link"]
