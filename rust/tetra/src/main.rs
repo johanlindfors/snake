@@ -1,6 +1,3 @@
-extern crate tetra; 
-extern crate rand;
-
 use tetra::graphics::{self, Color, DrawParams, Texture, Vec2};
 use tetra::{Context, ContextBuilder, State};
 use std::collections::VecDeque;
@@ -116,7 +113,7 @@ impl Snake {
     }
 }
 
-pub struct SnakeGame {
+struct SnakeGame {
     apple: Apple,
     snake: Snake
 }
@@ -186,7 +183,6 @@ impl State for SnakeGame {
         Ok(())
     }
 }
-
 
 pub fn main() -> tetra::Result {
     let width = (SPRITE_SIZE * SCREEN_SIZE) as i32;
