@@ -1,7 +1,7 @@
 extern crate tetra; 
 extern crate rand;
 
-use tetra::graphics::{self, Color, DrawParams, Texture};
+use tetra::graphics::{self, Color, DrawParams, Texture, Vec2};
 use tetra::{Context, ContextBuilder, State};
 use std::time::Duration;
 use std::collections::VecDeque;
@@ -41,13 +41,19 @@ impl Apple {
         })
     }
 
-    pub fn draw(&mut self, ctx: &mut Context) {
-        // canvas.set_draw_color(Color::RGB(255,0,0));
-        let width = (SPRITE_SIZE - 1) as u32;
-        let height = (SPRITE_SIZE - 1) as u32;
-        // canvas.fill_rect(
-        //     Rect::new(self.x * SPRITE_SIZE + 1, self.y * SPRITE_SIZE + 1, width, height))
-        //     .expect("Failed to draw the apple");
+    pub fn draw(&mut self, ctx: &mut Context) {        
+        graphics::draw(
+            ctx, 
+            &self.texture,
+            DrawParams::new()
+                    .position(Vec2::new(
+                        (self.x * SPRITE_SIZE) as f32, 
+                        (self.y * SPRITE_SIZE) as f32))
+                    .scale(Vec2::new(
+                        SPRITE_SIZE as f32, 
+                        SPRITE_SIZE as f32)
+                    )
+                );
     }
 }
 
@@ -120,8 +126,6 @@ impl Snake {
 }
 
 pub struct SnakeGame {
-    // canvas: Canvas<Window>,
-    // event_pump: sdl2::EventPump,
     apple: Apple,
     snake: Snake
 }
@@ -198,8 +202,8 @@ impl State for SnakeGame {
         // self.canvas.set_draw_color(Color::RGB(0, 0, 0));
         // self.canvas.clear();
 
-        // self.apple.draw(&mut self.canvas);
-        // self.snake.draw(&mut self.canvas);
+        self.apple.draw(ctx);
+        self.snake.draw(ctx);
         Ok(())
     }
 }
