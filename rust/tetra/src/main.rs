@@ -6,6 +6,7 @@ use tetra::{Context, ContextBuilder, State};
 use std::time::Duration;
 use std::collections::VecDeque;
 use rand::{Rng};
+use tetra::input::{self, Key};
 
 pub const FRAMES_PER_SECOND: u32 = 15;
 pub const SPRITE_SIZE: i32 = 20;
@@ -50,8 +51,8 @@ impl Apple {
                         (self.x * SPRITE_SIZE) as f32, 
                         (self.y * SPRITE_SIZE) as f32))
                     .scale(Vec2::new(
-                        SPRITE_SIZE as f32, 
-                        SPRITE_SIZE as f32)
+                        (SPRITE_SIZE as f32) * 0.95, 
+                        (SPRITE_SIZE as f32) * 0.95)
                     )
                 );
     }
@@ -114,13 +115,19 @@ impl Snake {
     }
 
     pub fn draw(&mut self, ctx: &mut Context) {
-        // canvas.set_draw_color(Color::RGB(0,255,0));
-        let width = (SPRITE_SIZE - 1) as u32;
-        let height = (SPRITE_SIZE - 1) as u32;
         for element in &self.trail {
-            // canvas.fill_rect(
-            //     Rect::new(element.x * SPRITE_SIZE + 1, element.y * SPRITE_SIZE + 1, width, height))
-            //     .expect("Failed to draw the snake");
+            graphics::draw(
+                ctx, 
+                &self.texture,
+                DrawParams::new()
+                        .position(Vec2::new(
+                            (element.x * SPRITE_SIZE) as f32, 
+                            (element.y * SPRITE_SIZE) as f32))
+                        .scale(Vec2::new(
+                            (SPRITE_SIZE as f32) * 0.95, 
+                            (SPRITE_SIZE as f32) * 0.95)
+                        )
+                    );
         }
     }
 }
@@ -137,55 +144,44 @@ impl SnakeGame {
             snake: Snake::new(ctx)?,
         })
     }
-    fn handle_input(&mut self) -> bool {
-        // for event in self.event_pump.poll_iter() {
-        //     match event {
-        //         Event::Quit {..} |
-        //         Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
-        //             return true;
-        //         },
-        //         Event::KeyDown { keycode: Some(Keycode::Left), .. } => {
-        //             if self.snake.dx == 0 {
-        //                 self.snake.dx = -1;
-        //                 self.snake.dy = 0;
-        //             }
-        //         },
-        //         Event::KeyDown { keycode: Some(Keycode::Right), .. } => {
-        //             if self.snake.dx == 0 {
-        //                 self.snake.dx = 1;
-        //                 self.snake.dy = 0;
-        //             }
-        //         },
-        //         Event::KeyDown { keycode: Some(Keycode::Up), .. } => {
-        //             if self.snake.dy == 0 {
-        //                 self.snake.dx = 0;
-        //                 self.snake.dy = -1;
-        //             }
-        //         },
-        //         Event::KeyDown { keycode: Some(Keycode::Down), .. } => {
-        //             if self.snake.dy == 0 {
-        //                 self.snake.dx = 0;
-        //                 self.snake.dy = 1;
-        //             }
-        //         },
-        //         _ => { }
-        //     }
-        // }
-        false
+
+    fn handle_input(&mut self, ctx: &mut Context) {
+        if input::is_key_pressed(ctx, Key::Left) {
+            if self.snake.dx == 0 {
+                self.snake.dx = -1;
+                self.snake.dy = 0;
+            }
+        } else if input::is_key_pressed(ctx, Key::Right) {
+            if self.snake.dx == 0 {
+                self.snake.dx = 1;
+                self.snake.dy = 0;
+            }
+        } else if input::is_key_pressed(ctx, Key::Up) {
+            if self.snake.dy == 0 {
+                self.snake.dx = 0;
+                self.snake.dy = -1;
+            }
+        } else if input::is_key_pressed(ctx, Key::Down) {
+            if self.snake.dy == 0 {
+                self.snake.dx = 0;
+                self.snake.dy = 1;
+            }
+        }
     }
 }
 
 impl State for SnakeGame {
 
-
     fn update(&mut self, ctx: &mut Context) -> tetra::Result {
+        self.handle_input(ctx);
+
         self.snake.update();
 
         if self.snake.check_collision(self.apple.x, self.apple.y) {
             self.snake.tail += 1;
             loop {
-                let x = rand::thread_rng().gen_range(0, SPRITE_SIZE * SCREEN_SIZE);
-                let y = rand::thread_rng().gen_range(0, SPRITE_SIZE * SCREEN_SIZE);
+                let x = rand::thread_rng().gen_range(0, SCREEN_SIZE);
+                let y = rand::thread_rng().gen_range(0, SCREEN_SIZE);
                 if !self.snake.check_collision(x,y) {
                     self.apple.x = x;
                     self.apple.y = y;
@@ -199,11 +195,10 @@ impl State for SnakeGame {
 
     fn draw(&mut self, ctx: &mut Context, _dt: f64) -> tetra::Result {
         graphics::clear(ctx, Color::rgb(0.0, 0.0, 0.0));
-        // self.canvas.set_draw_color(Color::RGB(0, 0, 0));
-        // self.canvas.clear();
 
         self.apple.draw(ctx);
         self.snake.draw(ctx);
+
         Ok(())
     }
 }
@@ -215,6 +210,7 @@ pub fn main() -> tetra::Result {
 
     ContextBuilder::new("snake", width, height)
         .quit_on_escape(true)
+        .tick_rate(15.0)
         .build()?
         .run_with(SnakeGame::new)
 }
