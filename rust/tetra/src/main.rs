@@ -3,29 +3,14 @@ extern crate rand;
 
 use tetra::graphics::{self, Color, DrawParams, Texture, Vec2};
 use tetra::{Context, ContextBuilder, State};
-use std::time::Duration;
 use std::collections::VecDeque;
 use rand::{Rng};
 use tetra::input::{self, Key};
 
-pub const FRAMES_PER_SECOND: u32 = 15;
-pub const SPRITE_SIZE: i32 = 20;
-pub const SCREEN_SIZE: i32 = 20;
-pub const INITIAL_TAIL: usize = 5;
-
-pub struct Position {
-    x: i32,
-    y: i32
-}
-
-impl Position {
-    pub fn new(x: i32, y: i32) -> Position {
-        Position {
-            x: x,
-            y: y,
-        }
-    }
-}
+const FRAMES_PER_SECOND: f64 = 15.0;
+const SPRITE_SIZE: i32 = 20;
+const SCREEN_SIZE: i32 = 20;
+const INITIAL_TAIL: usize = 5;
 
 struct Apple {
     x: i32,
@@ -34,7 +19,7 @@ struct Apple {
 }
 
 impl Apple {
-    pub fn new(ctx: &mut Context) -> tetra::Result<Apple> {
+    fn new(ctx: &mut Context) -> tetra::Result<Apple> {
         Ok(Apple {
             x: 3,
             y: 3,
@@ -42,7 +27,7 @@ impl Apple {
         })
     }
 
-    pub fn draw(&mut self, ctx: &mut Context) {        
+    fn draw(&mut self, ctx: &mut Context) {        
         graphics::draw(
             ctx, 
             &self.texture,
@@ -58,19 +43,19 @@ impl Apple {
     }
 }
 
-pub struct Snake {
-    pub x: i32,
-    pub y: i32,
-    pub dx: i32,
-    pub dy: i32,        
-    pub trail: VecDeque<Position>,
-    pub tail: usize,
+struct Snake {
+    x: i32,
+    y: i32,
+    dx: i32,
+    dy: i32,        
+    trail: VecDeque<(i32, i32)>,
+    tail: usize,
     texture: Texture
 }
 
 impl Snake {
 
-    pub fn new(ctx: &mut Context) -> tetra::Result<Snake> {
+    fn new(ctx: &mut Context) -> tetra::Result<Snake> {
         Ok(Snake {
             x: 10, 
             y: 10, 
@@ -82,16 +67,16 @@ impl Snake {
         })
     }
 
-    pub fn check_collision(&mut self, x: i32, y: i32) -> bool {
-        for element in &self.trail {
-            if element.x == x && element.y == y {
+    fn check_collision(&mut self, x: i32, y: i32) -> bool {
+        for (pos_x, pos_y) in &self.trail {
+            if *pos_x == x && *pos_y == y {
                 return true;
             }
         }
         return false;
     }
     
-    pub fn update(&mut self) {
+    fn update(&mut self) {
         let x = (self.x + SCREEN_SIZE + self.dx) % SCREEN_SIZE;
         let y = (self.y + SCREEN_SIZE + self.dy) % SCREEN_SIZE;
         if self.check_collision(x, y) {
@@ -105,7 +90,7 @@ impl Snake {
             self.y = y;
         }
 
-        self.trail.push_back(Position::new(self.x, self.y));
+        self.trail.push_back((self.x, self.y));
         loop {
             if self.trail.len() <= self.tail {
                 break;
@@ -114,20 +99,19 @@ impl Snake {
         }
     }
 
-    pub fn draw(&mut self, ctx: &mut Context) {
+    fn draw(&mut self, ctx: &mut Context) {
         for element in &self.trail {
             graphics::draw(
                 ctx, 
                 &self.texture,
                 DrawParams::new()
-                        .position(Vec2::new(
-                            (element.x * SPRITE_SIZE) as f32, 
-                            (element.y * SPRITE_SIZE) as f32))
-                        .scale(Vec2::new(
-                            (SPRITE_SIZE as f32) * 0.95, 
-                            (SPRITE_SIZE as f32) * 0.95)
-                        )
-                    );
+                    .position(Vec2::new(
+                        (element.0 * SPRITE_SIZE) as f32, 
+                        (element.1 * SPRITE_SIZE) as f32))
+                    .scale(Vec2::new(
+                        (SPRITE_SIZE as f32) * 0.95, 
+                        (SPRITE_SIZE as f32) * 0.95))
+            );
         }
     }
 }
@@ -210,7 +194,7 @@ pub fn main() -> tetra::Result {
 
     ContextBuilder::new("snake", width, height)
         .quit_on_escape(true)
-        .tick_rate(15.0)
+        .tick_rate(FRAMES_PER_SECOND)
         .build()?
         .run_with(SnakeGame::new)
 }
