@@ -1,7 +1,7 @@
 use tetra::graphics::{self, Color, DrawParams, Texture, Vec2};
 use tetra::{Context, ContextBuilder, State};
 use std::collections::VecDeque;
-use rand::{Rng};
+use rand::Rng;
 use tetra::input::{self, Key};
 
 const FRAMES_PER_SECOND: f64 = 15.0;
