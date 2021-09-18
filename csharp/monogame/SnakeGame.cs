@@ -72,8 +72,7 @@ namespace Snake
         }
     }
 
-    public class SnakeGame : Game
-    {
+    public class SnakeGame : Game {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Texture2D rectTexture;
@@ -81,9 +80,8 @@ namespace Snake
 
         Apple apple;
         Snake snake;
-        
-        public SnakeGame()
-        {
+
+        public SnakeGame() {
             graphics = new GraphicsDeviceManager(this);
             graphics.PreferredBackBufferHeight = Constants.SPRITE_SIZE * Constants.SCREEN_SIZE;
             graphics.PreferredBackBufferWidth = Constants.SPRITE_SIZE * Constants.SCREEN_SIZE;
@@ -92,18 +90,16 @@ namespace Snake
             TargetElapsedTime = TimeSpan.FromMilliseconds(1000/Constants.FPS);
         }
 
-        protected override void Initialize()
-        {
+        protected override void Initialize() {
             apple = new Apple();
             snake = new Snake();
-            
+
             rng = new Random();
 
             base.Initialize();
         }
 
-        protected override void LoadContent()
-        {
+        protected override void LoadContent() {
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             var data = new Color[1];
@@ -136,22 +132,22 @@ namespace Snake
                 }
             }
         }
+
         void GenerateApple() {
             do {
                 apple.x = rng.Next(Constants.SCREEN_SIZE);
-                apple.y = rng.Next(Constants.SCREEN_SIZE);                
+                apple.y = rng.Next(Constants.SCREEN_SIZE);
             } while(snake.CheckCollision(apple.x, apple.y));
         }
 
-        protected override void Update(GameTime gameTime)
-        {
+        protected override void Update(GameTime gameTime) {
             HandleInput();
 
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();                    
+                Exit();
 
             snake.Update();
-            
+
             if(snake.CheckCollision(apple.x, apple.y)){
                 snake.tail++;
                 GenerateApple();
@@ -160,8 +156,7 @@ namespace Snake
             base.Update(gameTime);
         }
 
-        protected override void Draw(GameTime gameTime)
-        {
+        protected override void Draw(GameTime gameTime) {
             GraphicsDevice.Clear(Color.Black);
 
             var position = new Vector2(100,100);
@@ -174,8 +169,7 @@ namespace Snake
             base.Draw(gameTime);
         }
 
-        static void Main()
-        {
+        static void Main() {
             using (var game = new SnakeGame())
                 game.Run();
         }
