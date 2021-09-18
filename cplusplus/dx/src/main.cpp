@@ -48,7 +48,7 @@ public:
   void Tick(const std::function<void()>& tickCallback) {
     auto now = timer.GetTime();
     auto delta = now - lastTime;
-      if(delta >= targetElapsedMilliseconds) { 
+      if(delta >= targetElapsedMilliseconds) {
       tickCallback();
       lastTime = now;
     }
@@ -171,9 +171,9 @@ public:
   ~Game() { factory.Reset(); }
 
   void Tick() {
-    timer.Tick([&]() { 
+    timer.Tick([&]() {
       Update();
-    });  
+    });
     Draw();
   }
 
