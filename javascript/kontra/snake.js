@@ -8,21 +8,21 @@ let { Sprite, GameLoop, initKeys } = kontra;
 let { canvas, context } = kontra.init('surface');
 
 let apple = Sprite({
-    x: 3,
-    y: 3,
+    X: 3,
+    Y: 3,
     width: SPRITE_SIZE - 1,
     height: SPRITE_SIZE - 1,
     color: 'red',
 
     render: function() {
         this.context.fillStyle = this.color;
-        this.context.fillRect(this.x * SPRITE_SIZE - this.x, this.y * SPRITE_SIZE - this.y, this.width, this.height);
+        this.context.fillRect(this.X * SPRITE_SIZE, this.Y * SPRITE_SIZE, this.width, this.height);
     }
 });
 
 let snake = Sprite({
-    x: 10,
-    y: 10,
+    X: 10,
+    Y: 10,
     width: SPRITE_SIZE - 1,
     height: SPRITE_SIZE - 1,
     color: 'green',
@@ -32,11 +32,11 @@ let snake = Sprite({
 
     checkCollision: function() {
         this.trail.forEach(element => {
-            if(element.x == this.position.x && element.y == this.position.y) {
+            if(element.X == this.X && element.Y == this.Y) {
                 if(snake.tail > INITIAL_TAIL){
                     console.log("Scored: %i", this.tail - INITIAL_TAIL);
                 }
-                this.position.x = this.position.y = 10;
+                this.X = this.Y = 10;
                 this.velocity.x = this.velocity.y = 0;
                 this.tail = INITIAL_TAIL;
             }
@@ -44,12 +44,12 @@ let snake = Sprite({
     },
 
     update: function() {
-        this.position.x = (this.position.x + this.velocity.x + SCREEN_SIZE) % SCREEN_SIZE;
-        this.position.y = (this.position.y + this.velocity.y + SCREEN_SIZE) % SCREEN_SIZE;
+        this.X = (this.X + this.velocity.x + SCREEN_SIZE) % SCREEN_SIZE;
+        this.Y = (this.Y + this.velocity.y + SCREEN_SIZE) % SCREEN_SIZE;
 
         this.checkCollision();
 
-        this.trail.push({x: this.position.x, y: this.position.y});
+        this.trail.push({X: this.X, Y: this.Y});
         while(this.trail.length > this.tail){
             this.trail.shift();
         }
@@ -58,7 +58,7 @@ let snake = Sprite({
     render: function() {
         this.context.fillStyle = this.color;
         this.trail.forEach(element => {
-            this.context.fillRect(element.x * SPRITE_SIZE - this.position.x, element.y * SPRITE_SIZE - this.position.y, this.width, this.height);
+            this.context.fillRect(element.X * SPRITE_SIZE, element.Y * SPRITE_SIZE, this.width, this.height);
         });
     }
 });
@@ -90,16 +90,16 @@ function generateApple() {
     needNewApple = false;
     do {
         needNewApple = false;
-        apple.x = Math.floor(Math.random() * SCREEN_SIZE);
-        apple.y = Math.floor(Math.random() * SCREEN_SIZE);
+        apple.X = Math.floor(Math.random() * SCREEN_SIZE);
+        apple.Y = Math.floor(Math.random() * SCREEN_SIZE);
         snake.trail.forEach(element => {
-            needNewApple |= (element.x == apple.x && element.y == apple.y);
+            needNewApple |= (element.X == apple.X && element.Y == apple.Y);
         });
     } while(needNewApple)
 }
 
 function checkPickup() {
-    if(apple.x == snake.x && apple.y == snake.y){
+    if(apple.X == snake.X && apple.Y == snake.Y){
         snake.tail++;
         generateApple();
     }
