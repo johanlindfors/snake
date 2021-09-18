@@ -1,3 +1,4 @@
+/// <reference path="matter.d.ts"/>
 /// <reference path="phaser.d.ts"/>
 
 let Constants = {
@@ -30,9 +31,11 @@ class Apple extends Phaser.GameObjects.GameObject {
     y: number;
     graphics: Phaser.GameObjects.Graphics;
 
-    constructor(scene) {
+    constructor(scene, x: number, y: number) {
         super(scene, "apple");
-        this.graphics = scene.add.graphics();        
+        this.x = x;
+        this.y = y;
+        this.graphics = scene.add.graphics();
         scene.add.existing(this);
     }
 
@@ -40,9 +43,9 @@ class Apple extends Phaser.GameObjects.GameObject {
         this.graphics.clear();
         this.graphics.fillStyle(0xff0000);
         this.graphics.fillRect(
-            this.x * Constants.SCREEN_SIZE + 1, 
-            this.y * Constants.SCREEN_SIZE + 1, 
-            Constants.SPRITE_SIZE -1, 
+            this.x * Constants.SCREEN_SIZE + 1,
+            this.y * Constants.SCREEN_SIZE + 1,
+            Constants.SPRITE_SIZE -1,
             Constants.SPRITE_SIZE - 1
         );
     }
@@ -65,7 +68,7 @@ class Snake extends Phaser.GameObjects.GameObject {
         this.dy = 0;
         this.tail = Constants.INITIAL_TAIL;
         this.trail = Array<BodyPosition>();
-        
+
         this.graphics = scene.add.graphics();
         scene.add.existing(this);
     }
@@ -101,7 +104,7 @@ class Snake extends Phaser.GameObjects.GameObject {
         this.graphics.fillStyle(0x00ff00);
         for(let element of this.trail) {
             this.graphics.fillRect(
-                element.x * Constants.SCREEN_SIZE + 1, 
+                element.x * Constants.SCREEN_SIZE + 1,
                 element.y * Constants.SCREEN_SIZE + 1,
                 Constants.SPRITE_SIZE -1,
                 Constants.SPRITE_SIZE - 1
@@ -122,15 +125,18 @@ class SnakeGameScene extends Phaser.Scene {
 
     create() : void {
         this.snake = new Snake(this, 10, 10);
-        this.apple = new Apple(this);
         this.generateApple();
     }
 
     generateApple() {
-        do {
-            this.apple.x = Phaser.Math.RND.between(0, Constants.SCREEN_SIZE - 1);
-            this.apple.y = Phaser.Math.RND.between(0, Constants.SCREEN_SIZE - 1);
-        } while(this.snake.checkCollision(this.apple.x, this.apple.y));
+        if(this.apple == undefined) {
+            this.apple = new Apple(this, 3, 3);
+        } else {
+            do {
+                this.apple.x = Phaser.Math.RND.between(0, Constants.SCREEN_SIZE - 1);
+                this.apple.y = Phaser.Math.RND.between(0, Constants.SCREEN_SIZE - 1);
+            } while(this.snake.checkCollision(this.apple.x, this.apple.y));
+        }
         this.apple.update();
     }
 
@@ -164,7 +170,7 @@ class SnakeGameScene extends Phaser.Scene {
     }
 }
 
-const config: GameConfig = {
+const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     width: Constants.SCREEN_SIZE * Constants.SPRITE_SIZE,
     height: Constants.SCREEN_SIZE * Constants.SPRITE_SIZE,
@@ -180,7 +186,7 @@ const config: GameConfig = {
 };
 
 class SnakeGame extends Phaser.Game {
-    constructor(config: GameConfig) {
+    constructor(config: Phaser.Types.Core.GameConfig) {
         super(config);
     }
 }

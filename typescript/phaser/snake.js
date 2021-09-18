@@ -1,8 +1,12 @@
+/// <reference path="matter.d.ts"/>
 /// <reference path="phaser.d.ts"/>
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -37,8 +41,10 @@ var Queue = /** @class */ (function () {
 }());
 var Apple = /** @class */ (function (_super) {
     __extends(Apple, _super);
-    function Apple(scene) {
+    function Apple(scene, x, y) {
         var _this = _super.call(this, scene, "apple") || this;
+        _this.x = x;
+        _this.y = y;
         _this.graphics = scene.add.graphics();
         scene.add.existing(_this);
         return _this;
@@ -56,9 +62,9 @@ var Snake = /** @class */ (function (_super) {
         var _this = _super.call(this, scene, "snake") || this;
         _this.x = x;
         _this.y = y;
-        _this.dx = 1;
+        _this.dx = 0;
         _this.dy = 0;
-        _this.tail = 19;
+        _this.tail = Constants.INITIAL_TAIL;
         _this.trail = Array();
         _this.graphics = scene.add.graphics();
         scene.add.existing(_this);
@@ -107,14 +113,18 @@ var SnakeGameScene = /** @class */ (function (_super) {
     }
     SnakeGameScene.prototype.create = function () {
         this.snake = new Snake(this, 10, 10);
-        this.apple = new Apple(this);
         this.generateApple();
     };
     SnakeGameScene.prototype.generateApple = function () {
-        do {
-            this.apple.x = Phaser.Math.RND.between(0, Constants.SCREEN_SIZE - 1);
-            this.apple.y = Phaser.Math.RND.between(0, Constants.SCREEN_SIZE - 1);
-        } while (this.snake.checkCollision(this.apple.x, this.apple.y));
+        if (this.apple == undefined) {
+            this.apple = new Apple(this, 3, 3);
+        }
+        else {
+            do {
+                this.apple.x = Phaser.Math.RND.between(0, Constants.SCREEN_SIZE - 1);
+                this.apple.y = Phaser.Math.RND.between(0, Constants.SCREEN_SIZE - 1);
+            } while (this.snake.checkCollision(this.apple.x, this.apple.y));
+        }
         this.apple.update();
     };
     SnakeGameScene.prototype.update = function (time) {
@@ -152,6 +162,7 @@ var config = {
     width: Constants.SCREEN_SIZE * Constants.SPRITE_SIZE,
     height: Constants.SCREEN_SIZE * Constants.SPRITE_SIZE,
     scene: [SnakeGameScene],
+    fps: { target: Constants.FRAMES_PER_SECOND },
     input: {
         keyboard: true,
         mouse: false,
