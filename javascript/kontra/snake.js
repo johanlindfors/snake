@@ -4,85 +4,84 @@ SCREEN_SIZE = 20;
 INITIAL_TAIL = 5;
 FPS = 15
 
-kontra.init();
+let { Sprite, GameLoop, initKeys } = kontra;
+let { canvas, context } = kontra.init('surface');
 
-let apple = kontra.sprite({
+let apple = Sprite({
     x: 3,
     y: 3,
-
     width: SPRITE_SIZE - 1,
     height: SPRITE_SIZE - 1,
     color: 'red',
-    
+
     render: function() {
         this.context.fillStyle = this.color;
-        this.context.fillRect(this.x * SPRITE_SIZE + 1, this.y * SPRITE_SIZE + 1, this.width, this.height);
+        this.context.fillRect(this.x * SPRITE_SIZE - this.x, this.y * SPRITE_SIZE - this.y, this.width, this.height);
     }
 });
 
-let snake = kontra.sprite({
+let snake = Sprite({
     x: 10,
-    y: 10,           
-    tail: INITIAL_TAIL,
-    trail: [],
-
+    y: 10,
     width: SPRITE_SIZE - 1,
     height: SPRITE_SIZE - 1,
     color: 'green',
-    
+
+    tail: INITIAL_TAIL,
+    trail: [],
+
     checkCollision: function() {
         this.trail.forEach(element => {
-            if(element.x == this.x && element.y == this.y) {
+            if(element.x == this.position.x && element.y == this.position.y) {
                 if(snake.tail > INITIAL_TAIL){
                     console.log("Scored: %i", this.tail - INITIAL_TAIL);
                 }
-                this.x = this.y = 10;
-                this.dx = this.dy = 0;
+                this.position.x = this.position.y = 10;
+                this.velocity.x = this.velocity.y = 0;
                 this.tail = INITIAL_TAIL;
             }
         });
     },
 
     update: function() {
-        this.advance();
-        this.x = (this.x + SCREEN_SIZE) % SCREEN_SIZE;
-        this.y = (this.y + SCREEN_SIZE) % SCREEN_SIZE;
+        this.position.x = (this.position.x + this.velocity.x + SCREEN_SIZE) % SCREEN_SIZE;
+        this.position.y = (this.position.y + this.velocity.y + SCREEN_SIZE) % SCREEN_SIZE;
 
         this.checkCollision();
 
-        this.trail.push({x: this.x, y: this.y});        
+        this.trail.push({x: this.position.x, y: this.position.y});
         while(this.trail.length > this.tail){
             this.trail.shift();
         }
     },
-    
+
     render: function() {
         this.context.fillStyle = this.color;
         this.trail.forEach(element => {
-            this.context.fillRect(element.x * SPRITE_SIZE + 1, element.y * SPRITE_SIZE + 1, this.width, this.height);
+            this.context.fillRect(element.x * SPRITE_SIZE - this.position.x, element.y * SPRITE_SIZE - this.position.y, this.width, this.height);
         });
     }
 });
 
 function checkInput() {
-    if(snake.dx == 0){
-        if(kontra.keys.pressed('left')) {
-            snake.dx = -1;
-            snake.dy = 0;
+    if(snake.velocity.x == 0){
+        if(kontra.keyPressed('left')) {
+            snake.velocity.x = -1;
+            snake.velocity.y = 0;
         }
-        if(kontra.keys.pressed('right')) {
-            snake.dx = 1;
-            snake.dy = 0;
+        if(kontra.keyPressed('right')) {
+            snake.velocity.x = 1;
+            snake.velocity.y = 0;
         }
     }
-    if(snake.dy == 0) {
-        if(kontra.keys.pressed('down')) {
-            snake.dx = 0;
-            snake.dy = 1;
+    if(snake.velocity.y == 0) {
+        if(kontra.keyPressed('down')) {
+            snake.velocity.x = 0;
+            snake.velocity.y = 1;
         }
-        if(kontra.keys.pressed('up')) {
-            snake.dx = 0;
-            snake.dy = -1;
+        if(kontra.keyPressed('up')) {
+            snake.velocity.x = 0;
+            snake.velocity.y = -1;
         }
     }
 }
@@ -106,7 +105,7 @@ function checkPickup() {
     }
 }
 
-let loop = kontra.gameLoop({
+let loop = GameLoop({
     fps: FPS,
     clearCanvas: true,
 
@@ -117,12 +116,10 @@ let loop = kontra.gameLoop({
     },
 
     render: function() {
-        kontra.context.fillStyle = 'black';
-        kontra.context.fillRect(0, 0, kontra.canvas.width, kontra.canvas.height);
-        
-        snake.render();
         apple.render();
+        snake.render();
     }
 });
 
+initKeys();
 loop.start();
