@@ -18,12 +18,10 @@ namespace Snake
         public int y = 3;
 
         public void Draw(SpriteBatch spriteBatch, Texture2D texture) {
-            var rect = new Rectangle(
-                x * Constants.SPRITE_SIZE + 1,
-                y * Constants.SPRITE_SIZE + 1,
-                Constants.SPRITE_SIZE - 1,
-                Constants.SPRITE_SIZE - 1);
-            spriteBatch.Draw(texture, rect, Color.Red);
+            var pos = new Vector2(
+                x * Constants.SPRITE_SIZE,
+                y * Constants.SPRITE_SIZE);
+            spriteBatch.Draw(texture, pos, Color.Red);
         }
     }
 
@@ -47,27 +45,23 @@ namespace Snake
             x = (x + dx + Constants.SCREEN_SIZE) % Constants.SCREEN_SIZE;
             y = (y + dy + Constants.SCREEN_SIZE) % Constants.SCREEN_SIZE;
 
-            if(CheckCollision(x,y)){
+            if(CheckCollision(x,y)) {
                 x = y = 10;
                 dx = dy = 0;
                 tail = Constants.INITIAL_TAIL;
             }
 
             trail.Enqueue(new Point(x, y));
-            while(trail.Count > tail){
+            while(trail.Count > tail)
                 trail.Dequeue();
-            }
         }
 
         public void Draw(SpriteBatch spriteBatch, Texture2D texture) {
-            foreach (var element in trail)
-            {
-                var rect = new Rectangle(
-                    element.X * Constants.SPRITE_SIZE + 1,
-                    element.Y * Constants.SPRITE_SIZE + 1,
-                    Constants.SPRITE_SIZE - 1,
-                    Constants.SPRITE_SIZE - 1);
-                spriteBatch.Draw(texture, rect, Color.Green);
+            foreach (var element in trail) {
+                var pos = new Vector2(
+                    element.X * Constants.SPRITE_SIZE,
+                    element.Y * Constants.SPRITE_SIZE);
+                spriteBatch.Draw(texture, pos, Color.Green);
             }
         }
     }
@@ -99,34 +93,39 @@ namespace Snake
             base.Initialize();
         }
 
+        private Texture2D GenerateTexture(int width, int height) {
+            var data = new Color[width*height];
+            for(int i=0; i<width*height;i++)
+                data[i] = Color.White;
+
+            var texture = new Texture2D(GraphicsDevice, width, height);
+            texture.SetData(data);
+            return texture;
+        }
+
         protected override void LoadContent() {
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
-            var data = new Color[1];
-            data[0] = Color.White;
-
-            rectTexture = new Texture2D(GraphicsDevice, 1, 1);
-            rectTexture.SetData(data);
+            rectTexture = GenerateTexture(Constants.SPRITE_SIZE - 1, Constants.SPRITE_SIZE - 1);
         }
 
         private void HandleInput() {
             var state = Keyboard.GetState();
-            if(snake.dx == 0){
-                if(state.IsKeyDown(Keys.Left)){
+            if(snake.dx == 0) {
+                if(state.IsKeyDown(Keys.Left)) {
                     snake.dx = -1;
                     snake.dy = 0;
                 }
-                if(state.IsKeyDown(Keys.Right)){
+                if(state.IsKeyDown(Keys.Right)) {
                     snake.dx = 1;
                     snake.dy = 0;
                 }
             }
-            if(snake.dy == 0 ){
-                if(state.IsKeyDown(Keys.Up)){
+            if(snake.dy == 0 ) {
+                if(state.IsKeyDown(Keys.Up)) {
                     snake.dx = 0;
                     snake.dy = -1;
                 }
-                if(state.IsKeyDown(Keys.Down)){
+                if(state.IsKeyDown(Keys.Down)) {
                     snake.dx = 0;
                     snake.dy = 1;
                 }
@@ -148,7 +147,7 @@ namespace Snake
 
             snake.Update();
 
-            if(snake.CheckCollision(apple.x, apple.y)){
+            if(snake.CheckCollision(apple.x, apple.y)) {
                 snake.tail++;
                 GenerateApple();
             }
