@@ -6,66 +6,6 @@ using System.Collections.Generic;
 
 namespace Snake
 {
-    public static class Constants {
-        public const int SPRITE_SIZE = 20;
-        public const int SCREEN_SIZE = 20;
-        public const int FPS = 15;
-        public const int INITIAL_TAIL = 5;
-    }
-
-    public class Apple {
-        public int x = 3;
-        public int y = 3;
-
-        public void Draw(SpriteBatch spriteBatch, Texture2D texture) {
-            var pos = new Vector2(
-                x * Constants.SPRITE_SIZE,
-                y * Constants.SPRITE_SIZE);
-            spriteBatch.Draw(texture, pos, Color.Red);
-        }
-    }
-
-    public class Snake {
-        public Queue<Point> trail = new Queue<Point>();
-        public int tail = Constants.INITIAL_TAIL;
-        public int x = 10;
-        public int y = 10;
-        public int dx;
-        public int dy;
-
-        public bool CheckCollision(int x, int y) {
-            foreach (var element in trail) {
-                if(element.X == x && element.Y == y)
-                    return true;
-            }
-            return false;
-        }
-
-        public void Update() {
-            x = (x + dx + Constants.SCREEN_SIZE) % Constants.SCREEN_SIZE;
-            y = (y + dy + Constants.SCREEN_SIZE) % Constants.SCREEN_SIZE;
-
-            if(CheckCollision(x,y)) {
-                x = y = 10;
-                dx = dy = 0;
-                tail = Constants.INITIAL_TAIL;
-            }
-
-            trail.Enqueue(new Point(x, y));
-            while(trail.Count > tail)
-                trail.Dequeue();
-        }
-
-        public void Draw(SpriteBatch spriteBatch, Texture2D texture) {
-            foreach (var element in trail) {
-                var pos = new Vector2(
-                    element.X * Constants.SPRITE_SIZE,
-                    element.Y * Constants.SPRITE_SIZE);
-                spriteBatch.Draw(texture, pos, Color.Green);
-            }
-        }
-    }
-
     public class SnakeGame : Game {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
@@ -91,6 +31,8 @@ namespace Snake
 
             rng = new Random();
 
+            GenerateApple();
+
             base.Initialize();
         }
 
@@ -113,22 +55,18 @@ namespace Snake
             var state = Keyboard.GetState();
             if(snake.dx == 0) {
                 if(state.IsKeyDown(Keys.Left)) {
-                    snake.dx = -1;
-                    snake.dy = 0;
+                    snake.Move(-1, 0);
                 }
                 if(state.IsKeyDown(Keys.Right)) {
-                    snake.dx = 1;
-                    snake.dy = 0;
+                    snake.Move(1, 0);
                 }
             }
             if(snake.dy == 0 ) {
                 if(state.IsKeyDown(Keys.Up)) {
-                    snake.dx = 0;
-                    snake.dy = -1;
+                    snake.Move(0, -1);
                 }
                 if(state.IsKeyDown(Keys.Down)) {
-                    snake.dx = 0;
-                    snake.dy = 1;
+                    snake.Move(0, 1);
                 }
             }
         }
@@ -149,7 +87,7 @@ namespace Snake
             snake.Update();
 
             if(snake.CheckCollision(apple.x, apple.y)) {
-                snake.tail++;
+                snake.Eat();
                 GenerateApple();
             }
 
