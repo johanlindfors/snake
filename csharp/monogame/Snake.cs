@@ -10,8 +10,11 @@ namespace Snake
         private int tail;
         private Queue<Point> trail = new Queue<Point>();
 
-        public int dx { get; private set;}
-        public int dy { get; private set;}
+        private int dx;
+        private int dy;
+
+        public int DX => dx;
+        public int DY => dy;
 
         public Snake() {
             Reset();
@@ -29,7 +32,7 @@ namespace Snake
             tail++;
         }
 
-        public void Move(int dx, int dy) {
+        public void Face(int dx, int dy) {
             this.dx = dx;
             this.dy = dy;
         }

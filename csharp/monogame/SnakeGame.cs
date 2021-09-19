@@ -53,29 +53,31 @@ namespace Snake
 
         private void HandleInput() {
             var state = Keyboard.GetState();
-            if(snake.dx == 0) {
+            if(snake.DX == 0) {
                 if(state.IsKeyDown(Keys.Left)) {
-                    snake.Move(-1, 0);
+                    snake.Face(-1, 0);
                 }
                 if(state.IsKeyDown(Keys.Right)) {
-                    snake.Move(1, 0);
+                    snake.Face(1, 0);
                 }
             }
-            if(snake.dy == 0 ) {
+            if(snake.DY == 0 ) {
                 if(state.IsKeyDown(Keys.Up)) {
-                    snake.Move(0, -1);
+                    snake.Face(0, -1);
                 }
                 if(state.IsKeyDown(Keys.Down)) {
-                    snake.Move(0, 1);
+                    snake.Face(0, 1);
                 }
             }
         }
 
         void GenerateApple() {
             do {
-                apple.x = rng.Next(Constants.SCREEN_SIZE);
-                apple.y = rng.Next(Constants.SCREEN_SIZE);
-            } while(snake.CheckCollision(apple.x, apple.y));
+                apple.Move(
+                    rng.Next(Constants.SCREEN_SIZE),
+                    rng.Next(Constants.SCREEN_SIZE)
+                );
+            } while(snake.CheckCollision(apple.X, apple.Y));
         }
 
         protected override void Update(GameTime gameTime) {
@@ -86,7 +88,7 @@ namespace Snake
 
             snake.Update();
 
-            if(snake.CheckCollision(apple.x, apple.y)) {
+            if(snake.CheckCollision(apple.X, apple.Y)) {
                 snake.Eat();
                 GenerateApple();
             }
