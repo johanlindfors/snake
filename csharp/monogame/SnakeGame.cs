@@ -77,14 +77,15 @@ namespace Snake
 
         public SnakeGame() {
             graphics = new GraphicsDeviceManager(this);
-            graphics.PreferredBackBufferHeight = Constants.SPRITE_SIZE * Constants.SCREEN_SIZE;
-            graphics.PreferredBackBufferWidth = Constants.SPRITE_SIZE * Constants.SCREEN_SIZE;
-            graphics.ApplyChanges();
 
             TargetElapsedTime = TimeSpan.FromMilliseconds(1000/Constants.FPS);
         }
 
         protected override void Initialize() {
+            graphics.PreferredBackBufferHeight = Constants.SPRITE_SIZE * Constants.SCREEN_SIZE;
+            graphics.PreferredBackBufferWidth = Constants.SPRITE_SIZE * Constants.SCREEN_SIZE;
+            graphics.ApplyChanges();
+
             apple = new Apple();
             snake = new Snake();
 
