@@ -7,11 +7,10 @@ namespace Snake
     public class Snake {
         private int x;
         private int y;
-        private int tail;
-        private Queue<Point> trail = new Queue<Point>();
-
         private int dx;
         private int dy;
+        private int tail;
+        private Queue<Point> trail = new Queue<Point>();
 
         public int DX => dx;
         public int DY => dy;
