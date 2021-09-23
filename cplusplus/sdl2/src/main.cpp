@@ -51,11 +51,13 @@ public:
 
     Snake() {
         trail = std::list<Point>();
+        reset();
+    }
+
+    void reset() {
+        x = y = 10;
+        dx = dy = 0;
         tail = INITIAL_TAIL;
-        x = 10;
-        y = 10;
-		dx = 0;
-        dy = 1;
     }
 
     bool checkCollision(int x, int y) {
@@ -72,9 +74,7 @@ public:
         y = (y + dy + SCREEN_SIZE) % SCREEN_SIZE;
 
 		if (checkCollision(x, y)) {
-			x = y = 10;
-			dx = dy = 0;
-			tail = INITIAL_TAIL;
+            reset();
 		}
 
         trail.push_back(Point(x,y));
