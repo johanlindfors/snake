@@ -99,8 +99,6 @@ public:
     int y;
 
     Apple() {
-		x = 3;
-		y = 3;
         std::srand(std::time(nullptr));
     }
 
@@ -130,7 +128,9 @@ public:
     Game()
         : snake(new Snake())
         , apple(new Apple())
-    { }
+    { 
+        apple->reposition(snake);
+    }
 
     ~Game() {
         SDL_DestroyRenderer(renderer);
