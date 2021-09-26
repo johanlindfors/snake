@@ -22,8 +22,8 @@ namespace Snake
         }
 
         protected override void Initialize() {
-            graphics.PreferredBackBufferHeight = Constants.SPRITE_SIZE * Constants.SCREEN_SIZE;
-            graphics.PreferredBackBufferWidth = Constants.SPRITE_SIZE * Constants.SCREEN_SIZE;
+            graphics.PreferredBackBufferHeight = Constants.SPRITE_SIZE * Constants.SCREEN_HEIGHT;
+            graphics.PreferredBackBufferWidth = Constants.SPRITE_SIZE * Constants.SCREEN_WIDTH;
             graphics.ApplyChanges();
 
             apple = new Apple();
@@ -74,8 +74,8 @@ namespace Snake
         void GenerateApple() {
             do {
                 apple.Move(
-                    rng.Next(Constants.SCREEN_SIZE),
-                    rng.Next(Constants.SCREEN_SIZE)
+                    rng.Next(Constants.SCREEN_WIDTH),
+                    rng.Next(Constants.SCREEN_HEIGHT)
                 );
             } while(snake.CheckCollision(apple.X, apple.Y));
         }

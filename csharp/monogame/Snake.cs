@@ -37,8 +37,8 @@ namespace Snake
         }
 
         public void Update() {
-            x = (x + dx + Constants.SCREEN_SIZE) % Constants.SCREEN_SIZE;
-            y = (y + dy + Constants.SCREEN_SIZE) % Constants.SCREEN_SIZE;
+            x = (x + dx + Constants.SCREEN_WIDTH) % Constants.SCREEN_WIDTH;
+            y = (y + dy + Constants.SCREEN_HEIGHT) % Constants.SCREEN_HEIGHT;
 
             if(CheckCollision(x,y)) {
                 Reset();
@@ -59,7 +59,8 @@ namespace Snake
         }
 
         private void Reset() {
-            x = y = Constants.SCREEN_SIZE/2;
+            x = Constants.SCREEN_WIDTH/2;
+            y = Constants.SCREEN_HEIGHT/2;
             dx = dy = 0;
             tail = Constants.INITIAL_TAIL;
         }
