@@ -9,7 +9,7 @@ import (
 )
 
 type Apple struct {
-	Position Point
+	Position Vector
 	Width    float64
 	Height   float64
 	Color    color.Color

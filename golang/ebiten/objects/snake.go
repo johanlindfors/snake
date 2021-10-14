@@ -9,17 +9,16 @@ import (
 )
 
 type Snake struct {
-	position Point
+	position Vector
+	velocity Vector
 	width    float64
 	height   float64
 	color    color.Color
 	tail     int
-	dx       int
-	dy       int
-	trail    []Point
+	trail    []Vector
 }
 
-func (s *Snake) CheckCollision(position Point) bool {
+func (s *Snake) CheckCollision(position Vector) bool {
 	for i := 0; i < len(s.trail); i++ {
 		if s.trail[i].X == position.X && s.trail[i].Y == position.Y {
 			return true
@@ -41,20 +40,18 @@ func (s *Snake) Draw(screen *ebiten.Image) {
 }
 
 func (s *Snake) Update() {
-	s.position.X = (s.position.X + s.dx + constants.ScreenSize) % constants.ScreenSize
-	s.position.Y = (s.position.Y + s.dy + constants.ScreenSize) % constants.ScreenSize
+	s.position.X = (s.position.X + s.velocity.X + constants.ScreenSize) % constants.ScreenSize
+	s.position.Y = (s.position.Y + s.velocity.Y + constants.ScreenSize) % constants.ScreenSize
 
 	if s.CheckCollision(s.position) {
-		s.position.X = constants.ScreenSize / 2
-		s.position.Y = constants.ScreenSize / 2
-		s.dx = 0
-		s.dy = 0
+		s.position = Vector{constants.ScreenSize / 2, constants.ScreenSize / 2}
+		s.velocity = Vector{0, 0}
 		s.tail = constants.InitialTail
 	}
 
 	s.trail = append(s.trail, s.position)
 	for ok := len(s.trail) > s.tail; ok; ok = len(s.trail) > s.tail {
-		ret := make([]Point, 0)
+		ret := make([]Vector, 0)
 		s.trail = append(ret, s.trail[1:]...)
 	}
 }
