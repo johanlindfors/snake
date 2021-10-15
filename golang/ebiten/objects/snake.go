@@ -22,8 +22,8 @@ type Snake struct {
 }
 
 func (s *Snake) CheckCollision(position Vector) bool {
-	for i := 0; i < len(s.trail); i++ {
-		if s.trail[i].X == position.X && s.trail[i].Y == position.Y {
+	for _, p := range s.trail {
+		if p.X == position.X && p.Y == position.Y {
 			return true
 		}
 	}
@@ -56,11 +56,11 @@ func (s *Snake) HandleInput() {
 }
 
 func (s *Snake) Draw(screen *ebiten.Image) {
-	for i := 0; i < len(s.trail); i++ {
+	for _, p := range s.trail {
 		ebitenutil.DrawRect(
 			screen,
-			float64(s.trail[i].X*constants.SpriteSize),
-			float64(s.trail[i].Y*constants.SpriteSize),
+			float64(p.X*constants.SpriteSize),
+			float64(p.Y*constants.SpriteSize),
 			s.width,
 			s.height,
 			s.color)
