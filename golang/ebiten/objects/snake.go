@@ -67,19 +67,29 @@ func (s *Snake) Draw(screen *ebiten.Image) {
 	}
 }
 
-func (s *Snake) Update() {
+func (s *Snake) move() {
 	s.position.X = (s.position.X + s.velocity.X + constants.ScreenSize) % constants.ScreenSize
 	s.position.Y = (s.position.Y + s.velocity.Y + constants.ScreenSize) % constants.ScreenSize
+}
 
-	if s.CheckCollision(s.position) {
-		s.position = Vector{constants.ScreenSize / 2, constants.ScreenSize / 2}
-		s.velocity = Vector{0, 0}
-		s.tail = constants.InitialTail
-	}
+func (s *Snake) reset() {
+	s.position = Vector{constants.ScreenSize / 2, constants.ScreenSize / 2}
+	s.velocity = Vector{0, 0}
+	s.tail = constants.InitialTail
+}
 
+func (s *Snake) trimTrail() {
 	s.trail = append(s.trail, s.position)
 	if len(s.trail) > s.tail {
 		ret := make([]Vector, 0)
 		s.trail = append(ret, s.trail[1:]...)
 	}
+}
+
+func (s *Snake) Update() {
+	s.move()
+	if s.CheckCollision(s.position) {
+		s.reset()
+	}
+	s.trimTrail()
 }
