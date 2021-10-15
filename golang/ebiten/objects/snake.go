@@ -2,10 +2,12 @@ package objects
 
 import (
 	"image/color"
+	"os"
 	"snake/constants"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 type Snake struct {
@@ -16,6 +18,7 @@ type Snake struct {
 	color    color.Color
 	tail     int
 	trail    []Vector
+	keys     []ebiten.Key
 }
 
 func (s *Snake) CheckCollision(position Vector) bool {
@@ -25,6 +28,31 @@ func (s *Snake) CheckCollision(position Vector) bool {
 		}
 	}
 	return false
+}
+
+func (s *Snake) HandleInput() {
+	s.keys = inpututil.AppendPressedKeys(s.keys[:0])
+	for _, p := range s.keys {
+		if p == ebiten.KeyArrowLeft && s.velocity.X == 0 {
+			s.velocity.X = -1
+			s.velocity.Y = 0
+		}
+		if p == ebiten.KeyArrowRight && s.velocity.X == 0 {
+			s.velocity.X = 1
+			s.velocity.Y = 0
+		}
+		if p == ebiten.KeyArrowDown && s.velocity.Y == 0 {
+			s.velocity.X = 0
+			s.velocity.Y = 1
+		}
+		if p == ebiten.KeyArrowUp && s.velocity.Y == 0 {
+			s.velocity.X = 0
+			s.velocity.Y = -1
+		}
+		if p == ebiten.KeyEscape {
+			os.Exit(0)
+		}
+	}
 }
 
 func (s *Snake) Draw(screen *ebiten.Image) {
