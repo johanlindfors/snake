@@ -23,7 +23,6 @@ type SnakeGame struct {
 }
 
 func (g *SnakeGame) Update() error {
-	g.snake.HandleInput()
 	g.snake.Update()
 
 	if g.snake.CheckCollision(g.apple.Position) {

@@ -30,7 +30,7 @@ func (s *Snake) CheckCollision(position Vector) bool {
 	return false
 }
 
-func (s *Snake) HandleInput() {
+func (s *Snake) handleInput() {
 	s.keys = inpututil.AppendPressedKeys(s.keys[:0])
 	for _, p := range s.keys {
 		if p == ebiten.KeyArrowLeft && s.velocity.X == 0 {
@@ -87,6 +87,7 @@ func (s *Snake) trimTrail() {
 }
 
 func (s *Snake) Update() {
+	s.handleInput()
 	s.move()
 	if s.CheckCollision(s.position) {
 		s.reset()
