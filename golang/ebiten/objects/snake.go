@@ -78,7 +78,7 @@ func (s *Snake) Update() {
 	}
 
 	s.trail = append(s.trail, s.position)
-	for ok := len(s.trail) > s.tail; ok; ok = len(s.trail) > s.tail {
+	if len(s.trail) > s.tail {
 		ret := make([]Vector, 0)
 		s.trail = append(ret, s.trail[1:]...)
 	}
