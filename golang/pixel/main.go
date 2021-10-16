@@ -40,6 +40,9 @@ func (p *PixelWrapper) HandleInput() interfaces.Direction {
 	if p.win.Pressed(pixelgl.KeyUp) {
 		return interfaces.Down
 	}
+	if p.win.Pressed(pixelgl.KeyEscape) {
+		p.win.SetClosed(true)
+	}
 	return interfaces.None
 }
 
@@ -60,10 +63,9 @@ func run() {
 	wrapper := PixelWrapper{imd, win}
 
 	for !win.Closed() {
-
-		game.Update(&wrapper)
 		imd.Clear()
 
+		game.Update(&wrapper)
 		game.Draw(&wrapper)
 
 		win.Clear(colornames.Black)
@@ -79,5 +81,4 @@ func run() {
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 	pixelgl.Run(run)
-	// ebiten.SetMaxTPS(constants.Fps)
 }
