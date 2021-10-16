@@ -49,7 +49,7 @@ func CreateGame() *Game {
 
 	snake := Snake{
 		position,                     // start position
-		Vector{1, 0},                 // velocity
+		Vector{0, 0},                 // velocity
 		constants.SpriteSize - 1,     // width
 		constants.SpriteSize - 1,     // height
 		color.RGBA{0, 0xff, 0, 0xff}, // green
