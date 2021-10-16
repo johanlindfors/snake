@@ -17,12 +17,12 @@ func GenerateApple(snake Snake, apple *Apple) {
 	}
 }
 
-type SnakeGame struct {
+type Game struct {
 	apple Apple
 	snake Snake
 }
 
-func (g *SnakeGame) Update() error {
+func (g *Game) Update() error {
 	g.snake.Update()
 
 	if g.snake.CheckCollision(g.apple.Position) {
@@ -32,17 +32,17 @@ func (g *SnakeGame) Update() error {
 	return nil
 }
 
-func (g *SnakeGame) Draw(screen *ebiten.Image) {
+func (g *Game) Draw(screen *ebiten.Image) {
 	g.apple.Draw(screen)
 	g.snake.Draw(screen)
 }
 
-func (g *SnakeGame) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
+func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
 	return constants.ScreenSize * constants.SpriteSize,
 		constants.ScreenSize * constants.SpriteSize
 }
 
-func CreateSnakeGame() *SnakeGame {
+func CreateGame() *Game {
 	position := Vector{constants.ScreenSize / 2, constants.ScreenSize / 2} // start position
 
 	apple := Apple{
@@ -63,5 +63,5 @@ func CreateSnakeGame() *SnakeGame {
 
 	GenerateApple(snake, &apple)
 
-	return &SnakeGame{apple, snake}
+	return &Game{apple, snake}
 }

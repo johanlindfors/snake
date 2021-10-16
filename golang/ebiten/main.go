@@ -18,7 +18,7 @@ func main() {
 	ebiten.SetWindowTitle("Snake!")
 	ebiten.SetMaxTPS(constants.Fps)
 
-	if err := ebiten.RunGame(objects.CreateSnakeGame()); err != nil {
+	if err := ebiten.RunGame(objects.CreateGame()); err != nil {
 		log.Fatal(err)
 	}
 }
