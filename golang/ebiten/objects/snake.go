@@ -2,23 +2,18 @@ package objects
 
 import (
 	"image/color"
-	"os"
 	"snake/constants"
-
-	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"snake/interfaces"
 )
 
 type Snake struct {
 	position Vector
 	velocity Vector
-	width    float64
-	height   float64
-	color    color.Color
+	width    int
+	height   int
+	color    color.RGBA
 	tail     int
 	trail    []Vector
-	keys     []ebiten.Key
 }
 
 func (s *Snake) CheckCollision(position Vector) bool {
@@ -30,40 +25,31 @@ func (s *Snake) CheckCollision(position Vector) bool {
 	return false
 }
 
-func (s *Snake) handleInput() {
-	s.keys = inpututil.AppendPressedKeys(s.keys[:0])
-	for _, p := range s.keys {
-		if p == ebiten.KeyArrowLeft && s.velocity.X == 0 {
-			s.velocity.X = -1
-			s.velocity.Y = 0
-		}
-		if p == ebiten.KeyArrowRight && s.velocity.X == 0 {
-			s.velocity.X = 1
-			s.velocity.Y = 0
-		}
-		if p == ebiten.KeyArrowDown && s.velocity.Y == 0 {
-			s.velocity.X = 0
-			s.velocity.Y = 1
-		}
-		if p == ebiten.KeyArrowUp && s.velocity.Y == 0 {
-			s.velocity.X = 0
-			s.velocity.Y = -1
-		}
-		if p == ebiten.KeyEscape {
-			os.Exit(0)
-		}
+func (s *Snake) handleInput(inputHandler interfaces.InputHandler) {
+	directionPressed := inputHandler.HandleInput()
+	if directionPressed == interfaces.Left && s.velocity.X == 0 {
+		s.velocity.X = -1
+		s.velocity.Y = 0
+	}
+	if directionPressed == interfaces.Right && s.velocity.X == 0 {
+		s.velocity.X = 1
+		s.velocity.Y = 0
+	}
+	if directionPressed == interfaces.Down && s.velocity.Y == 0 {
+		s.velocity.X = 0
+		s.velocity.Y = 1
+	}
+	if directionPressed == interfaces.Up && s.velocity.Y == 0 {
+		s.velocity.X = 0
+		s.velocity.Y = -1
 	}
 }
 
-func (s *Snake) Draw(screen *ebiten.Image) {
+func (s *Snake) Draw(renderer interfaces.Renderer) {
 	for _, p := range s.trail {
-		ebitenutil.DrawRect(
-			screen,
-			float64(p.X*constants.SpriteSize),
-			float64(p.Y*constants.SpriteSize),
-			s.width,
-			s.height,
-			s.color)
+		x := p.X * constants.SpriteSize
+		y := p.Y * constants.SpriteSize
+		renderer.RenderRectangle(x, y, x+s.width, y+s.height, s.color)
 	}
 }
 
@@ -86,8 +72,8 @@ func (s *Snake) trimTrail() {
 	}
 }
 
-func (s *Snake) Update() {
-	s.handleInput()
+func (s *Snake) Update(inputHandler interfaces.InputHandler) {
+	s.handleInput(inputHandler)
 	s.move()
 	if s.CheckCollision(s.position) {
 		s.reset()

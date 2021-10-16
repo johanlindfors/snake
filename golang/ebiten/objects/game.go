@@ -4,8 +4,9 @@ import (
 	"image/color"
 	"math/rand"
 	"snake/constants"
+	"snake/interfaces"
 
-	"github.com/hajimehoshi/ebiten/v2"
+	"golang.org/x/image/colornames"
 )
 
 func GenerateApple(snake Snake, apple *Apple) {
@@ -22,8 +23,8 @@ type Game struct {
 	snake Snake
 }
 
-func (g *Game) Update() error {
-	g.snake.Update()
+func (g *Game) Update(inputHandler interfaces.InputHandler) error {
+	g.snake.Update(inputHandler)
 
 	if g.snake.CheckCollision(g.apple.Position) {
 		g.snake.tail++
@@ -32,14 +33,9 @@ func (g *Game) Update() error {
 	return nil
 }
 
-func (g *Game) Draw(screen *ebiten.Image) {
-	g.apple.Draw(screen)
-	g.snake.Draw(screen)
-}
-
-func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return constants.ScreenSize * constants.SpriteSize,
-		constants.ScreenSize * constants.SpriteSize
+func (g *Game) Draw(renderer interfaces.Renderer) {
+	g.apple.Draw(renderer)
+	g.snake.Draw(renderer)
 }
 
 func CreateGame() *Game {
@@ -47,9 +43,9 @@ func CreateGame() *Game {
 
 	apple := Apple{
 		position,
-		constants.SpriteSize - 1,     // width
-		constants.SpriteSize - 1,     // height
-		color.RGBA{0xff, 0, 0, 0xff}} // red
+		constants.SpriteSize - 1, // width
+		constants.SpriteSize - 1, // height
+		colornames.Red}
 
 	snake := Snake{
 		position,                     // start position
@@ -58,8 +54,7 @@ func CreateGame() *Game {
 		constants.SpriteSize - 1,     // height
 		color.RGBA{0, 0xff, 0, 0xff}, // green
 		constants.InitialTail,
-		[]Vector{position},
-		[]ebiten.Key{}}
+		[]Vector{position}}
 
 	GenerateApple(snake, &apple)
 

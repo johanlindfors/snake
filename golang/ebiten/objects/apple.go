@@ -3,16 +3,14 @@ package objects
 import (
 	"image/color"
 	"snake/constants"
-
-	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"snake/interfaces"
 )
 
 type Apple struct {
 	Position Vector
-	Width    float64
-	Height   float64
-	Color    color.Color
+	Width    int
+	Height   int
+	Color    color.RGBA
 }
 
 func (a *Apple) Move(x, y int) {
@@ -20,12 +18,8 @@ func (a *Apple) Move(x, y int) {
 	a.Position.Y = y
 }
 
-func (a *Apple) Draw(screen *ebiten.Image) {
-	ebitenutil.DrawRect(
-		screen,
-		float64(a.Position.X*constants.SpriteSize),
-		float64(a.Position.Y*constants.SpriteSize),
-		a.Width,
-		a.Height,
-		a.Color)
+func (a *Apple) Draw(renderer interfaces.Renderer) {
+	x := a.Position.X * constants.SpriteSize
+	y := a.Position.Y * constants.SpriteSize
+	renderer.RenderRectangle(x, y, x+a.Width, y+a.Height, a.Color)
 }
