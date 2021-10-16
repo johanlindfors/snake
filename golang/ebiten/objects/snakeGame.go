@@ -9,7 +9,7 @@ import (
 )
 
 func GenerateApple(snake Snake, apple *Apple) {
-	for ok := true; ok; ok = snake.CheckCollision(apple.Position) {
+	for snake.CheckCollision(apple.Position) {
 		apple.Move(
 			rand.Intn(constants.ScreenSize),
 			rand.Intn(constants.ScreenSize),
